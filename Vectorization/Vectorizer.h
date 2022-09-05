@@ -35,11 +35,13 @@ public slots:
     void draw();
 
 private:
+    void onLoadDone();
     void onVectorize();
     void updateEdges();
 
 signals:
     void vectorize();
+    void loadDone();
     void vectorizationDone();
 
 private:
@@ -67,7 +69,7 @@ private:
     int mSelectedGaussianLayer;
     int mSelectedEdgeLayer;
     bool mInit;
-    bool mUpdateInitialData;
+    bool mUpdateData;
 };
 
 #endif // VECTORIZER_H

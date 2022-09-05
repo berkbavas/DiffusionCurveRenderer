@@ -20,7 +20,6 @@ Vectorizer::Vectorizer(QObject *parent)
     , mSelectedGaussianLayer(0)
     , mSelectedEdgeLayer(0)
     , mInit(false)
-    , mUpdateInitialData(false)
 
 {
     mBitmapRenderer = BitmapRenderer::instance();
@@ -28,6 +27,9 @@ Vectorizer::Vectorizer(QObject *parent)
 
     // onVectorize runs in a seperate thread
     connect(this, &Vectorizer::vectorize, this, &Vectorizer::onVectorize, Qt::QueuedConnection);
+
+    // onLoadDone runs in a seperate thread
+    connect(this, &Vectorizer::loadDone, this, &Vectorizer::onLoadDone, Qt::QueuedConnection);
 }
 
 void Vectorizer::load(QString path)
@@ -55,6 +57,14 @@ void Vectorizer::load(QString path)
 
     mOriginalImage = cv::imread(path.toStdString(), cv::IMREAD_COLOR);
 
+    mSubWorkMode = SubWorkMode::ViewOriginalImage;
+    mBitmapRenderer->setData(mOriginalImage, GL_BGR);
+
+    emit loadDone();
+}
+
+void Vectorizer::onLoadDone()
+{
     cv::Canny(mOriginalImage, mEdgeImage, mCannyUpperThreshold, mCannyLowerThreshold);
 
     mVectorizationStatus = VectorizationStatus::CreatingGaussianStack;
@@ -65,14 +75,15 @@ void Vectorizer::load(QString path)
     mEdgeStack = new EdgeStack;
     mEdgeStack->run(mGaussianStack, mCannyLowerThreshold, mCannyUpperThreshold);
 
-    mSubWorkMode = SubWorkMode::ChooseEdgeStackLevel;
     mVectorizationStatus = VectorizationStatus::Ready;
     mInit = true;
-    mUpdateInitialData = true;
+    mUpdateData = true;
 }
 
 void Vectorizer::onVectorize()
 {
+    qDebug() << "onVectorize thread:" << QThread::currentThreadId();
+
     // Tracing edges
     mVectorizationStatus = VectorizationStatus::TracingEdges;
     mEdgeTracer = new EdgeTracer;
@@ -95,15 +106,13 @@ void Vectorizer::onVectorize()
     mColorSampler = new ColorSampler;
     cv::Mat imageLAB;
     cv::cvtColor(mOriginalImage, imageLAB, cv::COLOR_BGR2Lab);
-    mColorSampler->run(mCurveConstructor->curves(), mOriginalImage, imageLAB, 0.1);
+    mColorSampler->run(mCurveConstructor->curves(), mOriginalImage, imageLAB, 0.05);
 
     // Set new curves
     mCurveManager->clear();
     mCurveManager->addCurves(mCurveConstructor->curves());
 
     mVectorizationStatus = VectorizationStatus::Finished;
-    mUpdateInitialData = true;
-
     emit vectorizationDone();
 }
 
@@ -165,10 +174,11 @@ void Vectorizer::draw()
     if (!mInit)
         return;
 
-    if (mUpdateInitialData)
+    if (mUpdateData)
     {
+        mUpdateData = false;
+        mSubWorkMode = SubWorkMode::ChooseEdgeStackLevel;
         mBitmapRenderer->setData(mEdgeStack->layer(mSelectedEdgeLayer), GL_RED);
-        mUpdateInitialData = false;
     }
 
     ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sub Work Modes");
