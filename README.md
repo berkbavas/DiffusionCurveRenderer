@@ -13,7 +13,7 @@ The project is developed using OpenGL, OpenCV, Eigen, ImGui and Qt framework and
 
 ## Dependencies
 This project has 3 dependencies and all of them is under `Dependencies` folder.
-I use ImGui for GUI; OpenCV for edge detecetion and Eigen for vectorization.
+I use ImGui for GUI; OpenCV for edge detection and Eigen for vectorization.
 OpenCV's binaries were built with `MSVC2019 64bit` compiler.
 
 ## Build
