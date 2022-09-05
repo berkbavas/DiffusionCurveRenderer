@@ -138,34 +138,54 @@ void DiffusionRenderer::upsample(QOpenGLFramebufferObject *draw, QOpenGLFramebuf
 
     for (int j = 0; j < mSmoothIterations; j++)
     {
-        QOpenGLFramebufferObject::blitFramebuffer(drawBuffer, //
-                                                  QRect(0, 0, drawBuffer->width(), drawBuffer->height()),
-                                                  draw,
-                                                  QRect(0, 0, draw->width(), draw->height()),
-                                                  GL_COLOR_BUFFER_BIT,
-                                                  GL_NEAREST,
-                                                  0,
-                                                  0);
+        if (j % 2 == 0)
+        {
+            drawBuffer->bind();
+            glViewport(0, 0, drawBuffer->width(), drawBuffer->height());
 
-        QOpenGLFramebufferObject::blitFramebuffer(drawBuffer, //
-                                                  QRect(0, 0, drawBuffer->width(), drawBuffer->height()),
-                                                  draw,
-                                                  QRect(0, 0, draw->width(), draw->height()),
-                                                  GL_COLOR_BUFFER_BIT,
-                                                  GL_NEAREST,
-                                                  1,
-                                                  1);
+            mShaderManager->bind(ShaderType::JacobiShader);
+            mShaderManager->setSampler("colorConstrainedTexture", 0, target->textures().at(0));
+            mShaderManager->setSampler("colorTargetTexture", 1, draw->textures().at(0));
+            mShaderManager->setSampler("blurConstrainedTexture", 2, target->textures().at(1));
+            mShaderManager->setSampler("blurTargetTexture", 3, draw->textures().at(1));
+            mQuad->render();
+            mShaderManager->release();
+            drawBuffer->release();
+        }
 
-        mShaderManager->bind(ShaderType::JacobiShader);
-        mShaderManager->setSampler("colorConstrainedTexture", 0, target->textures().at(0));
-        mShaderManager->setSampler("colorTargetTexture", 1, drawBuffer->textures().at(0));
-        mShaderManager->setSampler("blurConstrainedTexture", 2, target->textures().at(1));
-        mShaderManager->setSampler("blurTargetTexture", 3, drawBuffer->textures().at(1));
-        mQuad->render();
-        mShaderManager->release();
+        else
+        {
+            draw->bind();
+            glViewport(0, 0, draw->width(), draw->height());
+
+            mShaderManager->bind(ShaderType::JacobiShader);
+            mShaderManager->setSampler("colorConstrainedTexture", 0, target->textures().at(0));
+            mShaderManager->setSampler("colorTargetTexture", 1, drawBuffer->textures().at(0));
+            mShaderManager->setSampler("blurConstrainedTexture", 2, target->textures().at(1));
+            mShaderManager->setSampler("blurTargetTexture", 3, drawBuffer->textures().at(1));
+            mQuad->render();
+            mShaderManager->release();
+            draw->release();
+        }
     }
 
-    draw->release();
+    //        QOpenGLFramebufferObject::blitFramebuffer(drawBuffer, //
+    //                                                  QRect(0, 0, drawBuffer->width(), drawBuffer->height()),
+    //                                                  draw,
+    //                                                  QRect(0, 0, draw->width(), draw->height()),
+    //                                                  GL_COLOR_BUFFER_BIT,
+    //                                                  GL_NEAREST,
+    //                                                  0,
+    //                                                  0);
+
+    //        QOpenGLFramebufferObject::blitFramebuffer(drawBuffer, //
+    //                                                  QRect(0, 0, drawBuffer->width(), drawBuffer->height()),
+    //                                                  draw,
+    //                                                  QRect(0, 0, draw->width(), draw->height()),
+    //                                                  GL_COLOR_BUFFER_BIT,
+    //                                                  GL_NEAREST,
+    //                                                  1,
+    //                                                  1);
 }
 
 void DiffusionRenderer::drawFinalBlurCurves(QOpenGLFramebufferObject *draw)
