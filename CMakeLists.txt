@@ -51,6 +51,6 @@ add_custom_command(TARGET DiffusionCurveRenderer POST_BUILD
 )
 
 add_custom_command(TARGET DiffusionCurveRenderer POST_BUILD
-    COMMAND $ENV{Qt6_Dir}/windeployqt.exe 
+    COMMAND $ENV{Qt6_Dir}/bin/windeployqt.exe 
 	"\"$(OutDir)$(TargetName)$(TargetExt)\""
 )

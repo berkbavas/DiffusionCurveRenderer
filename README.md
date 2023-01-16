@@ -20,7 +20,7 @@ OpenCV's binaries were built with `MSVC 2019 64bit` compiler.
 1) Install `CMake 3.25.1` or latest.
 2) Install `Visual Studio 2019` and `MSVC C++ Compiler`.
 3) Install `Qt 6.x.x MSVC2019 64bit` kit.
-4) Define environment variable `Qt6_DIR` as `C:\Qt\6.x.x\msvc2019_64\bin`.
+4) Define environment variable `Qt6_DIR` as `C:\Qt\6.x.x\msvc2019_64`.
 5) Clone the repo `git clone https://github.com/berkbavas/DiffusionCurveRenderer.git`.
 6) Create a folder `mkdir Build`.
 7) Enter the folder `cd Build`.
