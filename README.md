@@ -14,16 +14,25 @@ The project is developed using OpenGL, OpenCV, Eigen, ImGui and Qt framework and
 ## Dependencies
 This project has 3 dependencies and all of them is under `Dependencies` folder.
 I use ImGui for GUI; OpenCV for edge detection and Eigen for vectorization.
-OpenCV's binaries were built with `MSVC2019 64bit` compiler.
+OpenCV's binaries were built with `MSVC 2019 64bit` compiler.
 
 ## Build
-Simply open `DiffusionCurveRenderer.pro` with `Qt Creator` and build it with kit `Qt 6.3.0 MSVC2019 64bit`. OpenCV's dlls should be put under the folder where the executable resides. Then you can run the application.
+1) Install `CMake 3.25.1` or latest.
+2) Install `Visual Studio 2019` and `MSVC C++ Compiler`.
+3) Install `Qt 6.x.x MSVC2019 64bit` kit.
+4) Define environment variable `Qt6_DIR` as `C:\Qt\6.x.x\msvc2019_64\bin`.
+5) Clone the repo `git clone https://github.com/berkbavas/DiffusionCurveRenderer.git`.
+6) Create a folder `mkdir Build`.
+7) Enter the folder `cd Build`.
+8) Run CMake `cmake ..`.
+9) Open `DiffusionCurveRenderer.sln` with `Visual Studio 2019`.
+10) Build & Run with `Release` configuration.
 
 ## Screenshots
-![](0.png)
+![](Screenshots/0.png)
 
-![](1.png)
+![](Screenshots/1.png)
 
-![](2.png)
+![](Screenshots/2.png)
 
-![](3.png)
+![](Screenshots/3.png)
