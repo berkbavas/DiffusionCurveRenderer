@@ -42,6 +42,12 @@ namespace DiffusionCurveRenderer
         Right
     };
 
+    enum class VectorizationCurveType
+    {
+        Bezier = 0x00,
+        Spline = 0x01
+    };
+
     Q_DECLARE_FLAGS(RenderModes, RenderMode);
 }
 

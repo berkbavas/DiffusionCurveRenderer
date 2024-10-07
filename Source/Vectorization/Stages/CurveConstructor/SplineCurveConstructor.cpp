@@ -1,13 +1,13 @@
-#include "CurveConstructor.h"
+#include "SplineCurveConstructor.h"
 
 #include <QDebug>
 
-DiffusionCurveRenderer::CurveConstructor::CurveConstructor(QObject* parent)
+DiffusionCurveRenderer::SplineCurveConstructor::SplineCurveConstructor(QObject* parent)
     : VectorizationStageBase(parent)
 {
 }
 
-void DiffusionCurveRenderer::CurveConstructor::Run(const QVector<QVector<Point>>& polylines)
+void DiffusionCurveRenderer::SplineCurveConstructor::Run(const QVector<QVector<Point>>& polylines)
 {
     for (int i = 0; i < polylines.size(); i++)
     {
@@ -21,7 +21,7 @@ void DiffusionCurveRenderer::CurveConstructor::Run(const QVector<QVector<Point>>
     }
 }
 
-DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::CurveConstructor::ConstructCurve(const QVector<Point>& polyline, double tension)
+DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::SplineCurveConstructor::ConstructCurve(const QVector<Point>& polyline, double tension)
 {
     const int nPoints = polyline.size();
 
@@ -42,12 +42,12 @@ DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::CurveConstructor::Const
     return spline;
 }
 
-const QVector<DiffusionCurveRenderer::CurvePtr>& DiffusionCurveRenderer::CurveConstructor::GetCurves() const
+const QVector<DiffusionCurveRenderer::CurvePtr>& DiffusionCurveRenderer::SplineCurveConstructor::GetCurves() const
 {
     return mCurves;
 }
 
-void DiffusionCurveRenderer::CurveConstructor::Reset()
+void DiffusionCurveRenderer::SplineCurveConstructor::Reset()
 {
     mCurves.clear();
 }

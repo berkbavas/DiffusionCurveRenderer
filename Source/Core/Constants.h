@@ -13,12 +13,12 @@ namespace DiffusionCurveRenderer
     // Diffusion
     constexpr float DEFAULT_DIFFUSION_GAP = 1.0f;
     constexpr float DEFAULT_DIFFUSION_WIDTH = 4.0f;
-    constexpr float DEFAULT_CONTOUR_THICKNESS = 4.0f;
+    constexpr float DEFAULT_CONTOUR_THICKNESS = 12.0f;
     constexpr float DEFAULT_BLUR_STRENGTH = 0.25f;
     constexpr int DEFAULT_SMOOTH_ITERATIONS = 20;
 
     // General render settings
-    constexpr int NUMBER_OF_INTERVALS = 200;
+    constexpr int NUMBER_OF_INTERVALS = 100;
     constexpr int DEFAULT_FRAMEBUFFER_SIZE = 2048;
 
     // Curve selection (Obsolete)

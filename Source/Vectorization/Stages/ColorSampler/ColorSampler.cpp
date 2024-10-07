@@ -8,8 +8,13 @@ DiffusionCurveRenderer::ColorSampler::ColorSampler(QObject* parent)
 
 void DiffusionCurveRenderer::ColorSampler::Run(const QVector<CurvePtr>& curves, cv::Mat& image, cv::Mat& imageLab, const double sampleDensity)
 {
-    for (int i = 0; i < curves.size(); i++)
+    int nCurves = curves.size();
+
+    for (int i = 0; i < nCurves; i++)
     {
+        float progress = float(i) / (nCurves - 1);
+        emit ProgressChanged(progress);
+
         CurvePtr curve = curves[i];
 
         SampleAlongNormal(curve, 0.0f, ColorPointType::Left, image, imageLab);

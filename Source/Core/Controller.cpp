@@ -149,8 +149,6 @@ void DiffusionCurveRenderer::Controller::Render(float ifps)
 
             if (mSelectedCurve)
                 mRendererManager->RenderCurve(mSelectedCurve);
-
-            mRendererManager->RenderForCurveSelection();
         }
         else if (mWorkMode == WorkMode::Vectorization)
         {
@@ -221,6 +219,10 @@ void DiffusionCurveRenderer::Controller::OnMouseMoved(QMouseEvent* event)
     {
         return;
     }
+
+    mWindow->makeCurrent();
+    mRendererManager->RenderForCurveSelection();
+    mWindow->doneCurrent();
 
     mEventHandler->OnMouseMoved(event);
 }
@@ -312,8 +314,12 @@ void DiffusionCurveRenderer::Controller::OnVectorizationStageFinished(Vectorizat
 
 void DiffusionCurveRenderer::Controller::OnVectorizationFinished(const QVector<CurvePtr>& curves)
 {
+    OnSelectedCurveChanged(nullptr);
     mCurveContainer->Clear();
     mCurveContainer->AddCurves(curves);
+
+    mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
+    mImGuiWindow->SetRenderMode(RenderMode::Contour, false);
     SetWorkMode(WorkMode::CurveEditing);
 }
 

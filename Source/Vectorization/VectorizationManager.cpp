@@ -13,7 +13,8 @@ DiffusionCurveRenderer::VectorizationManager::VectorizationManager(QObject* pare
     , mEdgeStack(this)
     , mEdgeTracer(this)
     , mPotrace(this)
-    , mCurveConstructor(this)
+    , mSplineCurveConstructor(this)
+    , mBezierCurveConstructor(this)
     , mColorSampler(this)
 {
     Setup();
@@ -21,29 +22,11 @@ DiffusionCurveRenderer::VectorizationManager::VectorizationManager(QObject* pare
 
 void DiffusionCurveRenderer::VectorizationManager::Setup()
 {
-    connect(&mGaussianStack, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::GaussianStack, mGaussianStack.GetHeight() - 1); });
-
-    connect(&mEdgeStack, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::EdgeStack, mEdgeStack.GetHeight() - 1); });
-
-    connect(&mEdgeTracer, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::EdgeTracer); });
-
-    connect(&mPotrace, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::Potrace); });
-
-    connect(&mCurveConstructor, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::CurveContructor); });
-
-    connect(&mColorSampler, &VectorizationStageBase::Finished, this, [=]()
-            { emit VectorizationStageFinished(VectorizationStage::ColorSampler); });
-
     connect(&mGaussianStack, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.5f * fraction); });
+            { emit ProgressChanged(0.90f * fraction); });
 
     connect(&mEdgeStack, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.5f + 0.5f * fraction); });
+            { emit ProgressChanged(0.90f + 0.10f * fraction); });
 
     connect(&mEdgeTracer, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
             { emit ProgressChanged(0.40f * fraction); });
@@ -51,7 +34,10 @@ void DiffusionCurveRenderer::VectorizationManager::Setup()
     connect(&mPotrace, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
             { emit ProgressChanged(0.40f + 0.40f * fraction); });
 
-    connect(&mCurveConstructor, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
+    connect(&mBezierCurveConstructor, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
+            { emit ProgressChanged(0.80f + 0.10f * fraction); });
+
+    connect(&mSplineCurveConstructor, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
             { emit ProgressChanged(0.80f + 0.10f * fraction); });
 
     connect(&mColorSampler, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
@@ -64,7 +50,8 @@ void DiffusionCurveRenderer::VectorizationManager::Reset()
     mEdgeStack.Reset();
     mEdgeTracer.Reset();
     mPotrace.Reset();
-    mCurveConstructor.Reset();
+    mSplineCurveConstructor.Reset();
+    mBezierCurveConstructor.Reset();
     mColorSampler.Reset();
 }
 
@@ -89,39 +76,60 @@ void DiffusionCurveRenderer::VectorizationManager::Prepare(const QString& path)
 
     SetVectorizationStage(VectorizationStage::GaussianStack);
     mGaussianStack.Run(mOriginalImage);
+    emit VectorizationStageFinished(VectorizationStage::GaussianStack, mGaussianStack.GetHeight() - 1);
 
     SetVectorizationStage(VectorizationStage::EdgeStack);
     mEdgeStack.Run(&mGaussianStack, mCannyLowerThreshold, mCannyUpperThreshold);
+    emit VectorizationStageFinished(VectorizationStage::EdgeStack, mEdgeStack.GetHeight() - 1);
 }
 
-void DiffusionCurveRenderer::VectorizationManager::Vectorize(int edgeLevel)
+void DiffusionCurveRenderer::VectorizationManager::Vectorize(VectorizationCurveType curveType, int edgeLevel)
 {
+    mEdgeTracer.Reset();
+    mPotrace.Reset();
+    mSplineCurveConstructor.Reset();
+    mBezierCurveConstructor.Reset();
+    mColorSampler.Reset();
+
     qDebug() << "VectorizationManager::LoadImage: Current Thread: " << QThread::currentThread();
     qDebug() << "VectorizationManager::LoadImage: Chosen Edge Level:" << edgeLevel;
 
-    // Trace edges
     SetVectorizationStage(VectorizationStage::EdgeTracer);
     mEdgeTracer.Run(mEdgeStack.GetLayer(edgeLevel), 10);
+    emit VectorizationStageFinished(VectorizationStage::EdgeTracer);
 
     qInfo() << "Chains detected."
             << "Number of chains is:" << mEdgeTracer.GetChains().size();
 
-    // Create polylines
     SetVectorizationStage(VectorizationStage::Potrace);
     mPotrace.Run(mEdgeTracer.GetChains());
+    emit VectorizationStageFinished(VectorizationStage::Potrace);
+
     qInfo() << "Number of polylines is:" << mPotrace.GetPolylines().size();
 
-    SetVectorizationStage(VectorizationStage::CurveContructor);
-    mCurveConstructor.Run(mPotrace.GetPolylines());
+    mCurrentCurveConstructor = nullptr;
 
-    SetVectorizationStage(VectorizationStage::ColorSampler);
+    if (curveType == VectorizationCurveType::Bezier)
+        mCurrentCurveConstructor = &mBezierCurveConstructor;
+    else if (curveType == VectorizationCurveType::Spline)
+        mCurrentCurveConstructor = &mSplineCurveConstructor;
+
+    DCR_ASSERT(mCurrentCurveConstructor != nullptr);
+
+    SetVectorizationStage(VectorizationStage::CurveContructor);
+    mCurrentCurveConstructor->Run(mPotrace.GetPolylines());
+    emit VectorizationStageFinished(VectorizationStage::CurveContructor);
+
     cv::Mat imageLAB;
     cv::cvtColor(mOriginalImage, imageLAB, cv::COLOR_BGR2Lab);
-    mColorSampler.Run(mCurveConstructor.GetCurves(), mOriginalImage, imageLAB, 0.05);
+
+    SetVectorizationStage(VectorizationStage::ColorSampler);
+    mColorSampler.Run(mCurrentCurveConstructor->GetCurves(), mOriginalImage, imageLAB, 0.05);
+    emit VectorizationStageFinished(VectorizationStage::ColorSampler);
 
     SetVectorizationStage(VectorizationStage::Finished);
 
-    emit VectorizationFinished(mCurveConstructor.GetCurves());
+    emit VectorizationFinished(mCurrentCurveConstructor->GetCurves());
 }
 
 void DiffusionCurveRenderer::VectorizationManager::SetVectorizationStage(VectorizationStage stage)

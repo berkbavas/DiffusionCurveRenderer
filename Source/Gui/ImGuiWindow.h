@@ -31,6 +31,7 @@ namespace DiffusionCurveRenderer
         int GetEdgeStackLayer() const { return mEdgeStackLayer; }
 
         void SetVectorizationViewOption(VectorizationViewOption option);
+        void SetRenderMode(RenderMode mode, bool on);
 
       signals:
         void SelectedCurveChanged(CurvePtr selectedCurve);
@@ -44,7 +45,7 @@ namespace DiffusionCurveRenderer
         void EdgeStackLayerChanged(int layer);
 
         void LoadImage(const QString& path);
-        void Vectorize(int edgeLevel);
+        void Vectorize(VectorizationCurveType curveType, int edgeLevel);
 
       private:
         void DrawWorkModes();
@@ -57,8 +58,6 @@ namespace DiffusionCurveRenderer
         void DrawRenderSettings();
         void DrawStats();
         void SetGaussianStackLayer(int layer);
-
-        void SetRenderMode(RenderMode mode, bool on);
 
         CurvePtr mSelectedCurve{ nullptr };
         ControlPointPtr mSelectedControlPoint{ nullptr };
@@ -83,6 +82,8 @@ namespace DiffusionCurveRenderer
 
         bool mRenderModeDiffusion{ true };
         bool mRenderModeContour{ true };
+
+        VectorizationCurveType mVectorizationCurveType{ VectorizationCurveType::Bezier };
 
         DEFINE_MEMBER(float, VectorizationProgress, 0.0f); // [0,1]
         DEFINE_MEMBER(int, MaximumGaussianStackLayer, 10);

@@ -86,9 +86,15 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawVectorizationViewOptions()
                     emit EdgeStackLayerChanged(mEdgeStackLayer);
                 }
 
+                int option = static_cast<int>(mVectorizationCurveType);
+                ImGui::Text("Choose curve type for vectorization:");
+                ImGui::RadioButton("Bezier", &option, 0);
+                ImGui::RadioButton("Spline", &option, 1);
+                mVectorizationCurveType = VectorizationCurveType(option);
+
                 if (ImGui::Button("Vectorize"))
                 {
-                    emit Vectorize(mEdgeStackLayer);
+                    emit Vectorize(mVectorizationCurveType, mEdgeStackLayer);
                 }
             }
         }

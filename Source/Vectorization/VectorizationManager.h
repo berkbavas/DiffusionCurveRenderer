@@ -3,8 +3,9 @@
 #include "Structs/Enums.h"
 #include "Util/Logger.h"
 #include "Util/Macros.h"
-#include "Vectorization/Stages/CurveConstructor/ColorSampler.h"
-#include "Vectorization/Stages/CurveConstructor/CurveConstructor.h"
+#include "Vectorization/Stages/ColorSampler/ColorSampler.h"
+#include "Vectorization/Stages/CurveConstructor/BezierCurveConstructor.h"
+#include "Vectorization/Stages/CurveConstructor/SplineCurveConstructor.h"
 #include "Vectorization/Stages/EdgeStack/EdgeStack.h"
 #include "Vectorization/Stages/EdgeTracer/EdgeTracer.h"
 #include "Vectorization/Stages/Potrace/Potrace.h"
@@ -24,7 +25,7 @@ namespace DiffusionCurveRenderer
         explicit VectorizationManager(QObject* parent = nullptr);
 
         void LoadImage(const QString& path);
-        void Vectorize(int edgeLevel);
+        void Vectorize(VectorizationCurveType curveType, int edgeLevel);
 
         cv::Mat GetGaussianStackLayer(int index) { return mGaussianStack.GetLayer(index); }
         cv::Mat GetEdgeStackLayer(int index) { return mEdgeStack.GetLayer(index); }
@@ -56,7 +57,10 @@ namespace DiffusionCurveRenderer
         EdgeStack mEdgeStack;
         EdgeTracer mEdgeTracer;
         Potrace mPotrace;
-        CurveConstructor mCurveConstructor;
+        SplineCurveConstructor mSplineCurveConstructor;
+        BezierCurveConstructor mBezierCurveConstructor;
         ColorSampler mColorSampler;
+
+        CurveConstructor* mCurrentCurveConstructor{ nullptr };
     };
 }
