@@ -46,6 +46,7 @@ namespace DiffusionCurveRenderer
 
         void LoadImage(const QString& path);
         void Vectorize(VectorizationCurveType curveType, int edgeLevel);
+        void ShowColorPointHandlesChanged(bool value);
 
       private:
         void DrawWorkModes();
@@ -82,6 +83,8 @@ namespace DiffusionCurveRenderer
 
         bool mRenderModeDiffusion{ true };
         bool mRenderModeContour{ true };
+
+        bool mShowColorPointHandles{ true };
 
         VectorizationCurveType mVectorizationCurveType{ VectorizationCurveType::Bezier };
 

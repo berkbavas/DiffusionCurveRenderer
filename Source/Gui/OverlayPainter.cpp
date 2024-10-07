@@ -25,7 +25,11 @@ void DiffusionCurveRenderer::OverlayPainter::Render()
 
     DrawControlPolygon();
     PaintControlPointsHandles();
-    PaintColorPointsHandles();
+
+    if (mPaintColorPointHandles)
+    {
+        PaintColorPointsHandles();
+    }
 }
 
 void DiffusionCurveRenderer::OverlayPainter::DrawControlPolygon()

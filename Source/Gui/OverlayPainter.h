@@ -48,6 +48,7 @@ namespace DiffusionCurveRenderer
         DEFINE_MEMBER(ColorPointPtr, SelectedColorPoint);
         DEFINE_MEMBER(ColorPointPtr, ColorPointAround);
         DEFINE_MEMBER(BlurPointPtr, SelectedBlurPoint);
+        DEFINE_MEMBER(bool, PaintColorPointHandles, true);
 
         static constexpr float INNER_DISK_RADIUS{ HANDLE_INNER_DISK_RADIUS_PX };
         static constexpr float OUTER_DISK_RADIUS{ HANDLE_OUTER_DISK_RADIUS_PX };

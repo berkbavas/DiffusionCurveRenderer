@@ -77,6 +77,9 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::WorkModeChanged, this, [=](WorkMode workMode)
             { mWorkMode = workMode; });
 
+    connect(mImGuiWindow, &ImGuiWindow::ShowColorPointHandlesChanged, this, [=](bool show)
+            { mOverlayPainter->SetPaintColorPointHandles(show); });
+
     connect(mImGuiWindow, &ImGuiWindow::VectorizationViewOptionChanged, this, &Controller::OnVectorizationViewOptionChanged);
     connect(mImGuiWindow, &ImGuiWindow::GaussianStackLayerChanged, this, &Controller::OnGaussianStackLayerChanged);
     connect(mImGuiWindow, &ImGuiWindow::EdgeStackLayerChanged, this, &Controller::OnEdgeStackLayerChanged);

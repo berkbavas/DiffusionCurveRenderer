@@ -181,6 +181,10 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawHintTexts()
         ImGui::Text("Add Control Point : Right Click");
         ImGui::Text("Add Color Point   : CTRL + Right Click");
         ImGui::Text("Move              : Middle button");
+        if (ImGui::Checkbox("Show Color Point Handles", &mShowColorPointHandles))
+        {
+            emit ShowColorPointHandlesChanged(mShowColorPointHandles);
+        }
     }
 }
 
