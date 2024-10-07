@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/Shaders/Bezier.vert</file>
+        <file>Resources/Shaders/Bezier.geom</file>
+        <file>Resources/Shaders/Bezier.frag</file>
+        <file>Resources/Shaders/Color.geom</file>
+        <file>Resources/Shaders/Color.frag</file>
+        <file>Resources/Shaders/Quad.vert</file>
+        <file>Resources/Shaders/Downsample.frag</file>
+        <file>Resources/Shaders/Jacobi.frag</file>
+        <file>Resources/Shaders/Screen.frag</file>
+        <file>Resources/Shaders/Upsample.frag</file>
+        <file>Resources/Shaders/Blur.frag</file>
+        <file>Resources/Shaders/ScreenMultisample.frag</file>
+        <file>Resources/Shaders/LastBlurPass.geom</file>
+        <file>Resources/Shaders/LastBlurPass.frag</file>
+        <file>Resources/Shaders/CurveSelection.geom</file>
+        <file>Resources/Shaders/CurveSelection.frag</file>
+        <file>Resources/Shaders/Bitmap.vert</file>
+        <file>Resources/Shaders/Bitmap.frag</file>
+    </qresource>
+</RCC>
