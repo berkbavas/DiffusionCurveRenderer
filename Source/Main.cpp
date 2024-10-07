@@ -12,8 +12,6 @@ int main(int argc, char* argv[])
 
     qInstallMessageHandler(Logger::QtMessageOutputCallback);
 
-    QImageReader::setAllocationLimit(0);
-
     Controller controller;
 
     controller.Run();

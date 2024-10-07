@@ -1,5 +1,7 @@
 #include "VectorizationManager.h"
 
+#include <QImage>
+#include <QTemporaryDir>
 #include <QThread>
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
@@ -59,18 +61,19 @@ void DiffusionCurveRenderer::VectorizationManager::LoadImage(const QString& path
 {
     qDebug() << "VectorizationManager::LoadImage: Current Thread: " << QThread::currentThread();
     qDebug() << "VectorizationManager::LoadImage: Path:" << path;
-    Prepare(path);
-}
-
-void DiffusionCurveRenderer::VectorizationManager::Prepare(const QString& path)
-{
-    Reset();
-
-    SetVectorizationStage(VectorizationStage::Initial);
 
     mOriginalImage = cv::imread(path.toStdString(), cv::IMREAD_COLOR);
 
     emit ImageLoaded(mOriginalImage);
+
+    Prepare();
+}
+
+void DiffusionCurveRenderer::VectorizationManager::Prepare()
+{
+    Reset();
+
+    SetVectorizationStage(VectorizationStage::Initial);
 
     cv::Canny(mOriginalImage, mCannyEdges, mCannyUpperThreshold, mCannyLowerThreshold);
 

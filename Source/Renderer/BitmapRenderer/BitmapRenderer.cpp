@@ -32,7 +32,7 @@ void DiffusionCurveRenderer::BitmapRenderer::Render()
     mBitmapShader->Release();
 }
 
-void DiffusionCurveRenderer::BitmapRenderer::SetImage(cv::Mat image, GLenum internalFormat, GLenum format)
+void DiffusionCurveRenderer::BitmapRenderer::SetImage(cv::Mat image, GLenum internalFormat, GLenum externalFormat)
 {
     if (mTexture)
     {
@@ -46,7 +46,7 @@ void DiffusionCurveRenderer::BitmapRenderer::SetImage(cv::Mat image, GLenum inte
         return;
     }
 
-    LOG_DEBUG("BitmapRenderer::SetImage: width = {}, height = {}, channels = {}", image.cols, image.rows, image.channels());
+    LOG_DEBUG("BitmapRenderer::SetImage: width = {}, height = {}, channels = {}, step = {}", image.cols, image.rows, image.channels(), image.step & 0xffffff);
 
     mTextureWidth = image.cols;
     mTextureHeight = image.rows;
@@ -59,7 +59,17 @@ void DiffusionCurveRenderer::BitmapRenderer::SetImage(cv::Mat image, GLenum inte
 
     glGenTextures(1, &mTexture);
     glBindTexture(GL_TEXTURE_2D, mTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.cols, image.rows, 0, format, GL_UNSIGNED_BYTE, image.ptr());
+
+    // OpenCV and OpenGL stores images based on different alignments.
+    // Following two calls solves this alignment issue.
+    // Source: https://stackoverflow.com/questions/53558514/opengl-render-to-a-opencv-mat-as-texture-and-reuse-it-in-opencv
+    // Use fast 4-byte alignment (default anyway) if possible
+    glPixelStorei(GL_UNPACK_ALIGNMENT, (image.step & 3) ? 1 : 4);
+
+    // Set length of one complete row in data (doesn't need to equal image.cols)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, image.step / image.elemSize());
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.cols, image.rows, 0, externalFormat, GL_UNSIGNED_BYTE, image.ptr());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

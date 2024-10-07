@@ -248,7 +248,7 @@ void DiffusionCurveRenderer::Controller::OnVectorizationViewOptionChanged(Vector
         case VectorizationViewOption::ViewOriginalImage:
         {
             cv::Mat image = mVectorizationManager->GetOriginalImage();
-            mBitmapRenderer->SetImage(image, GL_RGB8, GL_BGR);
+            mBitmapRenderer->SetImage(image, GL_RGB, GL_BGR);
             break;
         }
         case VectorizationViewOption::ViewEdges:

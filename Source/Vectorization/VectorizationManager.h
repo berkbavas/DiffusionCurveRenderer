@@ -40,7 +40,7 @@ namespace DiffusionCurveRenderer
       private:
         void Setup();
         void Reset();
-        void Prepare(const QString& path);
+        void Prepare();
 
         void SetVectorizationStage(VectorizationStage state);
 

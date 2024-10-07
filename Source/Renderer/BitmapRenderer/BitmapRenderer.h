@@ -15,7 +15,7 @@ namespace DiffusionCurveRenderer
       public:
         BitmapRenderer();
         void Render();
-        void SetImage(cv::Mat image, GLenum internalFormat, GLenum format);
+        void SetImage(cv::Mat image, GLenum internalFormat, GLenum externalFormat);
 
       private:
         GLuint mTexture{ 0 };
