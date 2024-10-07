@@ -3,7 +3,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 DiffusionCurveRenderer::EdgeStack::EdgeStack(QObject* parent)
-    : VectorizationStateBase(parent)
+    : VectorizationStageBase(parent)
 {
 }
 

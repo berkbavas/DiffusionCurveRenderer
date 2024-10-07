@@ -47,12 +47,13 @@ namespace DiffusionCurveRenderer
         void OnMouseMoved(QMouseEvent*);
         void OnWheelMoved(QWheelEvent*);
 
-        void OnVectorizationOptionChanged(VectorizationOption option);
-        void OnImageLoaded(cv::Mat image);
+        void OnVectorizationViewOptionChanged(VectorizationViewOption option);
         void OnGaussianStackLayerChanged(int layer);
-        void OnGaussianStackFinished(int maximumLayer);
         void OnEdgeStackLayerChanged(int layer);
-        void OnEdgeStackFinished(int maximumLayer);
+
+        void OnImageLoaded(cv::Mat image);
+        void OnVectorizationStageFinished(VectorizationStage stage, QVariant additionalData);
+        void OnVectorizationFinished(const QVector<CurvePtr>& curves);
 
       private:
         void OnSelectedCurveChanged(CurvePtr selectedCurve);

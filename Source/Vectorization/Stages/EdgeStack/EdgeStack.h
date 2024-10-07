@@ -1,14 +1,13 @@
-// This code taken from https://github.com/zhuethanca/DiffusionCurves
 #pragma once
 
-#include "GaussianStack.h"
+#include "Vectorization/Stages/GaussianStack/GaussianStack.h"
 
 #include <QVector>
 #include <opencv2/core/mat.hpp>
 
 namespace DiffusionCurveRenderer
 {
-    class EdgeStack : public VectorizationStateBase
+    class EdgeStack : public VectorizationStageBase
     {
       private:
         /*

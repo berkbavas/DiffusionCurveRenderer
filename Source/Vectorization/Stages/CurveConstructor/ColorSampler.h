@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Curve/Spline.h"
+#include "Vectorization/Stages/Base/VectorizationStageBase.h"
 
 #include <QRandomGenerator>
 #include <QVector2D>
@@ -9,11 +10,14 @@
 
 namespace DiffusionCurveRenderer
 {
-    class ColorSampler
+    class ColorSampler : public VectorizationStageBase
     {
       public:
-        ColorSampler();
+        explicit ColorSampler(QObject* parent);
+
         void Run(const QVector<CurvePtr>& curves, cv::Mat& image, cv::Mat& imageLab, const double sampleDensity);
+
+        void Reset() override;
 
       private:
         void SampleAlongNormal(CurvePtr curve, float parameter, ColorPointType type, cv::Mat& image, cv::Mat& imageLab, const double distance = 3.0);

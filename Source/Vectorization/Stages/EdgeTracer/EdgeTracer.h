@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Vectorization/States/PixelChain.h"
-#include "Vectorization/States/VectorizationStateBase.h"
+#include "Vectorization/Stages/Base/PixelChain.h"
+#include "Vectorization/Stages/Base/VectorizationStageBase.h"
 
 #include <QList>
 #include <opencv2/core.hpp>
@@ -9,7 +9,7 @@
 
 namespace DiffusionCurveRenderer
 {
-    class EdgeTracer : public VectorizationStateBase
+    class EdgeTracer : public VectorizationStageBase
     {
       public:
         explicit EdgeTracer(QObject* parent);

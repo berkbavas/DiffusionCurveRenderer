@@ -77,7 +77,7 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::WorkModeChanged, this, [=](WorkMode workMode)
             { mWorkMode = workMode; });
 
-    connect(mImGuiWindow, &ImGuiWindow::VectorizationOptionChanged, this, &Controller::OnVectorizationOptionChanged);
+    connect(mImGuiWindow, &ImGuiWindow::VectorizationViewOptionChanged, this, &Controller::OnVectorizationViewOptionChanged);
     connect(mImGuiWindow, &ImGuiWindow::GaussianStackLayerChanged, this, &Controller::OnGaussianStackLayerChanged);
     connect(mImGuiWindow, &ImGuiWindow::EdgeStackLayerChanged, this, &Controller::OnEdgeStackLayerChanged);
 
@@ -85,20 +85,10 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::Vectorize, mVectorizationManager, &VectorizationManager::Vectorize, Qt::QueuedConnection);
 
     connect(mVectorizationManager, &VectorizationManager::ProgressChanged, mImGuiWindow, &ImGuiWindow::SetVectorizationProgress, Qt::QueuedConnection);
-    connect(mVectorizationManager, &VectorizationManager::VectorizationStateChanged, mImGuiWindow, &ImGuiWindow::SetVectorizationState, Qt::QueuedConnection);
-
+    connect(mVectorizationManager, &VectorizationManager::VectorizationStageChanged, mImGuiWindow, &ImGuiWindow::SetVectorizationStage, Qt::QueuedConnection);
     connect(mVectorizationManager, &VectorizationManager::ImageLoaded, this, &Controller::OnImageLoaded, Qt::QueuedConnection);
-    connect(mVectorizationManager, &VectorizationManager::GaussianStackFinished, this, &Controller::OnGaussianStackFinished, Qt::QueuedConnection);
-    connect(mVectorizationManager, &VectorizationManager::EdgeStackFinished, this, &Controller::OnEdgeStackFinished, Qt::QueuedConnection);
-
-    connect(mVectorizationManager, &VectorizationManager::VectorizationFinished, this, //
-            [=](const QVector<CurvePtr>& curves)
-            {
-                mCurveContainer->Clear();
-                mCurveContainer->AddCurves(curves);
-                SetWorkMode(WorkMode::Vectorization); //
-            },
-            Qt::QueuedConnection);
+    connect(mVectorizationManager, &VectorizationManager::VectorizationStageFinished, this, &Controller::OnVectorizationStageFinished, Qt::QueuedConnection);
+    connect(mVectorizationManager, &VectorizationManager::VectorizationFinished, this, &Controller::OnVectorizationFinished, Qt::QueuedConnection);
 }
 
 DiffusionCurveRenderer::Controller::~Controller()
@@ -245,32 +235,32 @@ void DiffusionCurveRenderer::Controller::OnWheelMoved(QWheelEvent* event)
     mEventHandler->OnWheelMoved(event);
 }
 
-void DiffusionCurveRenderer::Controller::OnVectorizationOptionChanged(VectorizationOption option)
+void DiffusionCurveRenderer::Controller::OnVectorizationViewOptionChanged(VectorizationViewOption option)
 {
     qDebug() << (int) option;
 
     switch (option)
     {
-        case VectorizationOption::ViewOriginalImage:
+        case VectorizationViewOption::ViewOriginalImage:
         {
             cv::Mat image = mVectorizationManager->GetOriginalImage();
             mBitmapRenderer->SetImage(image, GL_RGB8, GL_BGR);
             break;
         }
-        case VectorizationOption::ViewEdges:
+        case VectorizationViewOption::ViewEdges:
         {
             cv::Mat image = mVectorizationManager->GetCannyEdges();
             mBitmapRenderer->SetImage(image, GL_R8, GL_RED);
             break;
         }
-        case VectorizationOption::ViewGaussianStack:
+        case VectorizationViewOption::ViewGaussianStack:
         {
             int index = mImGuiWindow->GetGaussianStackLayer();
             cv::Mat image = mVectorizationManager->GetGaussianStackLayer(index);
             mBitmapRenderer->SetImage(image, GL_RGB8, GL_BGR);
             break;
         }
-        case VectorizationOption::ChooseEdgeStackLevel:
+        case VectorizationViewOption::ChooseEdgeStackLevel:
         {
             int index = mImGuiWindow->GetEdgeStackLayer();
             cv::Mat image = mVectorizationManager->GetEdgeStackLayer(index);
@@ -288,6 +278,8 @@ void DiffusionCurveRenderer::Controller::OnImageLoaded(cv::Mat image)
     mBitmapRenderer->SetImage(image, GL_RGB8, GL_BGR);
     mCamera->Reset();
     SetWorkMode(WorkMode::Vectorization);
+    mImGuiWindow->SetVectorizationViewOption(VectorizationViewOption::ViewOriginalImage);
+    mImGuiWindow->SetImageLoaded(true);
     mWindow->doneCurrent();
 }
 
@@ -297,20 +289,32 @@ void DiffusionCurveRenderer::Controller::OnGaussianStackLayerChanged(int layer)
     mBitmapRenderer->SetImage(image, GL_RGB8, GL_BGR);
 }
 
-void DiffusionCurveRenderer::Controller::OnGaussianStackFinished(int maximumLayer)
-{
-    mImGuiWindow->SetMaximumGaussianStackLayer(maximumLayer);
-}
-
 void DiffusionCurveRenderer::Controller::OnEdgeStackLayerChanged(int layer)
 {
     cv::Mat image = mVectorizationManager->GetEdgeStackLayer(layer);
     mBitmapRenderer->SetImage(image, GL_R8, GL_RED);
 }
 
-void DiffusionCurveRenderer::Controller::OnEdgeStackFinished(int maximumLayer)
+void DiffusionCurveRenderer::Controller::OnVectorizationStageFinished(VectorizationStage stage, QVariant additionalData)
 {
-    mImGuiWindow->SetMaximumEdgeStackLayer(maximumLayer);
+    switch (stage)
+    {
+        case VectorizationStage::GaussianStack:
+            mImGuiWindow->SetMaximumGaussianStackLayer(additionalData.toInt());
+            break;
+        case VectorizationStage::EdgeStack:
+            mImGuiWindow->SetMaximumEdgeStackLayer(additionalData.toInt());
+            break;
+        default:
+            break;
+    }
+}
+
+void DiffusionCurveRenderer::Controller::OnVectorizationFinished(const QVector<CurvePtr>& curves)
+{
+    mCurveContainer->Clear();
+    mCurveContainer->AddCurves(curves);
+    SetWorkMode(WorkMode::CurveEditing);
 }
 
 void DiffusionCurveRenderer::Controller::OnSelectedCurveChanged(CurvePtr selectedCurve)

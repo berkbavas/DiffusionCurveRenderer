@@ -1,13 +1,13 @@
 #pragma once
 
-#include "PixelChain.h"
-#include "Vectorization/States/VectorizationStateBase.h"
+#include "Vectorization/Stages/Base/PixelChain.h"
+#include "Vectorization/Stages/Base/VectorizationStageBase.h"
 
 #include <QVector>
 
 namespace DiffusionCurveRenderer
 {
-    class Potrace : public VectorizationStateBase
+    class Potrace : public VectorizationStageBase
     {
       public:
         explicit Potrace(QObject* parent);

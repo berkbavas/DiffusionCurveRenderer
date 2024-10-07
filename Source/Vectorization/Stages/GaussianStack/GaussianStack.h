@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vectorization/States/VectorizationStateBase.h"
+#include "Vectorization/Stages/Base/VectorizationStageBase.h"
 
 #include <QVector>
 #include <opencv2/core/mat.hpp>
@@ -8,7 +8,7 @@
 
 namespace DiffusionCurveRenderer
 {
-    class GaussianStack : public VectorizationStateBase
+    class GaussianStack : public VectorizationStageBase
     {
         Q_OBJECT
       private:

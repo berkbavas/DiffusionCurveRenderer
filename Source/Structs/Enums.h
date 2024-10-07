@@ -10,19 +10,19 @@ namespace DiffusionCurveRenderer
         CurveEditing = 0x01,
     };
 
-    enum class VectorizationState
+    enum class VectorizationStage
     {
         Initial,
-        Ready,
-        CreatingGaussianStack,
-        CreatingEdgeStack,
-        TracingEdges,
-        CreatingPolylines,
-        ConstructingCurves,
-        Finished,
+        GaussianStack,
+        EdgeStack,
+        EdgeTracer,
+        Potrace,
+        CurveContructor,
+        ColorSampler,
+        Finished
     };
 
-    enum class VectorizationOption
+    enum class VectorizationViewOption
     {
         ViewOriginalImage,
         ViewEdges,

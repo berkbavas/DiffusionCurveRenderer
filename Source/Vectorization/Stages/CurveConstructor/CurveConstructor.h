@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Curve/Spline.h"
-#include "Point.h"
-#include "Vectorization/States/VectorizationStateBase.h"
+#include "Vectorization/Stages/Base/Point.h"
+#include "Vectorization/Stages/Base/VectorizationStageBase.h"
 
 namespace DiffusionCurveRenderer
 {
-    class CurveConstructor : public VectorizationStateBase
+    class CurveConstructor : public VectorizationStageBase
     {
       public:
         explicit CurveConstructor(QObject* parent);

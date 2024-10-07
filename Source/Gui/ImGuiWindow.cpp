@@ -30,7 +30,7 @@ void DiffusionCurveRenderer::ImGuiWindow::Draw()
     DrawWorkModes();
     if (mWorkMode == WorkMode::Vectorization)
     {
-        DrawVectorizationOptions();
+        DrawVectorizationViewOptions();
     }
     else
     {
@@ -44,42 +44,44 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawWorkModes()
     if (ImGui::CollapsingHeader("Work Modes", ImGuiTreeNodeFlags_DefaultOpen))
     {
         int mode = (int) mWorkMode;
-        // ImGui::BeginDisabled(!mImageLoaded);
+        ImGui::BeginDisabled(!mImageLoaded);
         ImGui::RadioButton("Vectorization##WorkMode", &mode, 0);
-        // ImGui::EndDisabled();
+        ImGui::EndDisabled();
         ImGui::RadioButton("Curve Editing##WorkMode", &mode, 1);
         SetWorkMode(WorkMode(mode));
     }
 }
 
-void DiffusionCurveRenderer::ImGuiWindow::DrawVectorizationOptions()
+void DiffusionCurveRenderer::ImGuiWindow::DrawVectorizationViewOptions()
 {
-    if (mVectorizationState == VectorizationState::Ready || mVectorizationState == VectorizationState::Finished)
+    if (mVectorizationStage == VectorizationStage::EdgeStack || mVectorizationStage == VectorizationStage::Finished)
     {
         if (ImGui::CollapsingHeader("Vectorization Options", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            int option = static_cast<int>(mVectorizationOption);
+            int option = static_cast<int>(mVectorizationViewOption);
 
             ImGui::RadioButton("View Original Image", &option, 0);
             ImGui::RadioButton("View Edges", &option, 1);
             ImGui::RadioButton("View Gaussian Stack", &option, 2);
             ImGui::RadioButton("Choose Edge Stack Level", &option, 3);
 
-            SetVectorizationOption(VectorizationOption(option));
+            SetVectorizationViewOption(VectorizationViewOption(option));
 
-            if (mVectorizationOption == VectorizationOption::ViewGaussianStack)
+            if (mVectorizationViewOption == VectorizationViewOption::ViewGaussianStack)
             {
                 ImGui::Text("Gaussian Stack Layers");
-                if (ImGui::SliderInt("Layer##Gaussian", &mGaussianStackLayer, 0, mMaximumGaussianStackLayer))
+
+                if (ImGui::SliderInt("Layer##GaussianStack", &mGaussianStackLayer, 0, mMaximumGaussianStackLayer))
                 {
                     emit GaussianStackLayerChanged(mGaussianStackLayer);
                 }
             }
 
-            if (mVectorizationOption == VectorizationOption::ChooseEdgeStackLevel)
+            if (mVectorizationViewOption == VectorizationViewOption::ChooseEdgeStackLevel)
             {
                 ImGui::Text("Edge Stack Layers");
-                if (ImGui::SliderInt("Layer##Edge", &mEdgeStackLayer, 0, mMaximumEdgeStackLayer))
+
+                if (ImGui::SliderInt("Layer##EdgeStach", &mEdgeStackLayer, 0, mMaximumEdgeStackLayer))
                 {
                     emit EdgeStackLayerChanged(mEdgeStackLayer);
                 }
@@ -93,34 +95,33 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawVectorizationOptions()
     }
     else
     {
-        DrawVectorizationProgressBar();
-    }
-}
+        if (mVectorizationStage == VectorizationStage::GaussianStack)
+        {
+            ImGui::Text("Status: Creating Gaussian Stack...");
+        }
+        else if (mVectorizationStage == VectorizationStage::EdgeStack)
+        {
+            ImGui::Text("Status: Creating Edge Stack...");
+        }
+        else if (mVectorizationStage == VectorizationStage::EdgeTracer)
+        {
+            ImGui::Text("Status: Tracing Edges...");
+        }
+        else if (mVectorizationStage == VectorizationStage::Potrace)
+        {
+            ImGui::Text("Status: Creating Polylines...");
+        }
+        else if (mVectorizationStage == VectorizationStage::CurveContructor)
+        {
+            ImGui::Text("Status: Constructing Curves...");
+        }
+        else if (mVectorizationStage == VectorizationStage::ColorSampler)
+        {
+            ImGui::Text("Status: Sampling Colors...");
+        }
 
-void DiffusionCurveRenderer::ImGuiWindow::DrawVectorizationProgressBar()
-{
-    if (mVectorizationState == VectorizationState::CreatingGaussianStack)
-    {
-        ImGui::Text("Status: Creating Gaussian Stack...");
+        ImGui::ProgressBar(mVectorizationProgress);
     }
-    else if (mVectorizationState == VectorizationState::CreatingEdgeStack)
-    {
-        ImGui::Text("Status: Creating Edge Stack...");
-    }
-    else if (mVectorizationState == VectorizationState::TracingEdges)
-    {
-        ImGui::Text("Status: Tracing Edges...");
-    }
-    else if (mVectorizationState == VectorizationState::CreatingPolylines)
-    {
-        ImGui::Text("Status: Creating Polylines...");
-    }
-    else if (mVectorizationState == VectorizationState::ConstructingCurves)
-    {
-        ImGui::Text("Status: Constructing Curves...");
-    }
-
-    ImGui::ProgressBar(mVectorizationProgress);
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::DrawCurveEditingSettings()
@@ -345,19 +346,19 @@ void DiffusionCurveRenderer::ImGuiWindow::SetWorkMode(WorkMode workMode)
     emit WorkModeChanged(mWorkMode);
 }
 
-void DiffusionCurveRenderer::ImGuiWindow::SetVectorizationState(VectorizationState state)
+void DiffusionCurveRenderer::ImGuiWindow::SetVectorizationStage(VectorizationStage state)
 {
-    mVectorizationState = state;
+    mVectorizationStage = state;
 }
 
-void DiffusionCurveRenderer::ImGuiWindow::SetVectorizationOption(VectorizationOption option)
+void DiffusionCurveRenderer::ImGuiWindow::SetVectorizationViewOption(VectorizationViewOption option)
 {
-    if (mVectorizationOption == option)
+    if (mVectorizationViewOption == option)
         return;
 
-    mVectorizationOption = option;
+    mVectorizationViewOption = option;
 
-    emit VectorizationOptionChanged(mVectorizationOption);
+    emit VectorizationViewOptionChanged(mVectorizationViewOption);
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::SetGaussianStackLayer(int layer)

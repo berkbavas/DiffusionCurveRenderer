@@ -3,7 +3,7 @@
 #include <QDebug>
 
 DiffusionCurveRenderer::CurveConstructor::CurveConstructor(QObject* parent)
-    : VectorizationStateBase(parent)
+    : VectorizationStageBase(parent)
 {
 }
 

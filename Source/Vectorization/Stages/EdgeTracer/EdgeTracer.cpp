@@ -3,7 +3,7 @@
 #include <Eigen/SparseCore>
 
 DiffusionCurveRenderer::EdgeTracer::EdgeTracer(QObject* parent)
-    : VectorizationStateBase(parent)
+    : VectorizationStageBase(parent)
 {
 }
 

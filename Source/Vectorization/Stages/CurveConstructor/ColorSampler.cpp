@@ -1,8 +1,7 @@
 #include "ColorSampler.h"
 
-#include <random>
-
-DiffusionCurveRenderer::ColorSampler::ColorSampler()
+DiffusionCurveRenderer::ColorSampler::ColorSampler(QObject* parent)
+    : VectorizationStageBase(parent)
 {
     mRandomGenerator = QRandomGenerator::securelySeeded();
 }
@@ -30,6 +29,11 @@ void DiffusionCurveRenderer::ColorSampler::Run(const QVector<CurvePtr>& curves, 
             SampleAlongNormal(curve, mRandomGenerator.bounded(1.0f), ColorPointType::Right, image, imageLab);
         }
     }
+}
+
+void DiffusionCurveRenderer::ColorSampler::Reset()
+{
+    // Nothing to do
 }
 
 void DiffusionCurveRenderer::ColorSampler::SampleAlongNormal(CurvePtr curve, float parameter, ColorPointType type, cv::Mat& image, cv::Mat& imageLab, const double distance)

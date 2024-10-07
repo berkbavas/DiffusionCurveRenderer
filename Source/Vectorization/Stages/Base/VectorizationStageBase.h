@@ -4,11 +4,11 @@
 
 namespace DiffusionCurveRenderer
 {
-    class VectorizationStateBase : public QObject
+    class VectorizationStageBase : public QObject
     {
         Q_OBJECT
       public:
-        explicit VectorizationStateBase(QObject* parent);
+        explicit VectorizationStageBase(QObject* parent);
 
         virtual void Reset() = 0;
 

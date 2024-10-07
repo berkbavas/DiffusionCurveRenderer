@@ -1,7 +1,7 @@
 #include "Potrace.h"
 
 DiffusionCurveRenderer::Potrace::Potrace(QObject* parent)
-    : VectorizationStateBase(parent)
+    : VectorizationStageBase(parent)
 {
 }
 

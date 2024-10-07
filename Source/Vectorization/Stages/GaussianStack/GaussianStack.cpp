@@ -1,7 +1,7 @@
 #include "GaussianStack.h"
 
 DiffusionCurveRenderer::GaussianStack::GaussianStack(QObject* parent)
-    : VectorizationStateBase(parent)
+    : VectorizationStageBase(parent)
 {
 }
 

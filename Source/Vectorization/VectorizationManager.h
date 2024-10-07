@@ -3,11 +3,11 @@
 #include "Structs/Enums.h"
 #include "Util/Logger.h"
 #include "Util/Macros.h"
-#include "Vectorization/States/ColorSampler.h"
-#include "Vectorization/States/CurveConstructor.h"
-#include "Vectorization/States/EdgeStack.h"
-#include "Vectorization/States/EdgeTracer.h"
-#include "Vectorization/States/Potrace.h"
+#include "Vectorization/Stages/CurveConstructor/ColorSampler.h"
+#include "Vectorization/Stages/CurveConstructor/CurveConstructor.h"
+#include "Vectorization/Stages/EdgeStack/EdgeStack.h"
+#include "Vectorization/Stages/EdgeTracer/EdgeTracer.h"
+#include "Vectorization/Stages/Potrace/Potrace.h"
 
 #include <QObject>
 #include <QVariant>
@@ -31,17 +31,17 @@ namespace DiffusionCurveRenderer
 
       signals:
         void ImageLoaded(cv::Mat image);
-        void VectorizationStateChanged(VectorizationState state);
         void ProgressChanged(float fraction);
-        void GaussianStackFinished(int maximumStackIndex);
-        void EdgeStackFinished(int maximumStackIndex);
+        void VectorizationStageChanged(VectorizationStage stage);
+        void VectorizationStageFinished(VectorizationStage stage, QVariant additionalData = QVariant());
         void VectorizationFinished(const QVector<CurvePtr>& curves);
 
       private:
+        void Setup();
         void Reset();
         void Prepare(const QString& path);
 
-        void SetVectorizationState(VectorizationState state);
+        void SetVectorizationStage(VectorizationStage state);
 
         DEFINE_MEMBER_CONST(cv::Mat, OriginalImage);
 
@@ -50,7 +50,7 @@ namespace DiffusionCurveRenderer
         float mCannyUpperThreshold{ 200.0f };
         float mCannyLowerThreshold{ 20.0f };
 
-        VectorizationState mVectorizationState{ VectorizationState::Ready };
+        VectorizationStage mVectorizationStage{ VectorizationStage::Initial };
 
         GaussianStack mGaussianStack;
         EdgeStack mEdgeStack;

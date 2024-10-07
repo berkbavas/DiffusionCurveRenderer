@@ -23,14 +23,14 @@ namespace DiffusionCurveRenderer
         void SetSelectedCurve(CurvePtr selectedCurve);
         void SetSelectedControlPoint(ControlPointPtr point);
         void SetSelectedColorPoint(ColorPointPtr point);
-        void SetRenderMode(RenderMode mode, bool on);
+
         void SetWorkMode(WorkMode workMode);
-        void SetVectorizationState(VectorizationState state);
-        void SetVectorizationOption(VectorizationOption option);
-        void SetGaussianStackLayer(int layer);
+        void SetVectorizationStage(VectorizationStage stage);
 
         int GetGaussianStackLayer() const { return mGaussianStackLayer; }
         int GetEdgeStackLayer() const { return mEdgeStackLayer; }
+
+        void SetVectorizationViewOption(VectorizationViewOption option);
 
       signals:
         void SelectedCurveChanged(CurvePtr selectedCurve);
@@ -39,7 +39,7 @@ namespace DiffusionCurveRenderer
 
         void RenderModesChanged(RenderModes modes);
         void WorkModeChanged(WorkMode workMode);
-        void VectorizationOptionChanged(VectorizationOption option);
+        void VectorizationViewOptionChanged(VectorizationViewOption option);
         void GaussianStackLayerChanged(int layer);
         void EdgeStackLayerChanged(int layer);
 
@@ -48,10 +48,7 @@ namespace DiffusionCurveRenderer
 
       private:
         void DrawWorkModes();
-
-        void DrawVectorizationOptions();
-        void DrawVectorizationProgressBar();
-
+        void DrawVectorizationViewOptions();
         void DrawCurveEditingSettings();
         void DrawMenuBar();
         void DrawHintTexts();
@@ -59,20 +56,26 @@ namespace DiffusionCurveRenderer
         void DrawCurveHeader();
         void DrawRenderSettings();
         void DrawStats();
+        void SetGaussianStackLayer(int layer);
 
+        void SetRenderMode(RenderMode mode, bool on);
+
+        CurvePtr mSelectedCurve{ nullptr };
+        ControlPointPtr mSelectedControlPoint{ nullptr };
+        ColorPointPtr mSelectedColorPoint{ nullptr };
+
+        // Render settings
         float mGlobalContourThickness;
         float mGlobalDiffusionWidth;
         float mGlobalDiffusionGap;
         float mGlobalBlurStrength;
-
         int mSmoothIterations;
         int mFrambufferSize;
-
         int mFrambufferSizeIndex;
 
         WorkMode mWorkMode{ WorkMode::CurveEditing };
-        VectorizationState mVectorizationState{ VectorizationState::Ready };
-        VectorizationOption mVectorizationOption{ VectorizationOption::ViewOriginalImage };
+        VectorizationStage mVectorizationStage{ VectorizationStage::Initial };
+        VectorizationViewOption mVectorizationViewOption{ VectorizationViewOption::ViewOriginalImage };
         int mGaussianStackLayer{ 0 };
         int mEdgeStackLayer{ 0 };
 
@@ -80,10 +83,6 @@ namespace DiffusionCurveRenderer
 
         bool mRenderModeDiffusion{ true };
         bool mRenderModeContour{ true };
-
-        CurvePtr mSelectedCurve{ nullptr };
-        ControlPointPtr mSelectedControlPoint{ nullptr };
-        ColorPointPtr mSelectedColorPoint{ nullptr };
 
         DEFINE_MEMBER(float, VectorizationProgress, 0.0f); // [0,1]
         DEFINE_MEMBER(int, MaximumGaussianStackLayer, 10);
