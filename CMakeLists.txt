@@ -48,7 +48,7 @@ add_custom_command(TARGET DiffusionCurveRenderer
 POST_BUILD COMMAND xcopy /E /Y  "\"$(SolutionDir)../Resources\"" "\"$(BuildDir)Resources/*\"")
     
 add_custom_command(TARGET DiffusionCurveRenderer
- POST_BUILD COMMAND xcopy /E /Y  "\"$(SolutionDir)../Libs/opencv-4.6.0/bin\"" "\"$(OutDir)\"")
+POST_BUILD COMMAND xcopy /E /Y  "\"$(SolutionDir)../Libs/opencv-4.6.0/bin\"" "\"$(OutDir)\"")
 
 add_custom_command(TARGET DiffusionCurveRenderer
 POST_BUILD COMMAND "$ENV{Qt6_Dir}/bin/windeployqt.exe" "\"$(OutDir)$(TargetName)$(TargetExt)\"")
