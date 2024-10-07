@@ -32,16 +32,16 @@ void DiffusionCurveRenderer::VectorizationManager::Setup()
             { emit ProgressChanged(0.40f * fraction); });
 
     connect(&mPotrace, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.40f + 0.40f * fraction); });
+            { emit ProgressChanged(0.40f + 0.20f * fraction); });
 
     connect(&mBezierCurveConstructor, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.80f + 0.10f * fraction); });
+            { emit ProgressChanged(0.60f + 0.20f * fraction); });
 
     connect(&mSplineCurveConstructor, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.80f + 0.10f * fraction); });
+            { emit ProgressChanged(0.60f + 0.20f * fraction); });
 
     connect(&mColorSampler, &VectorizationStageBase::ProgressChanged, this, [=](float fraction)
-            { emit ProgressChanged(0.90f + 0.10f * fraction); });
+            { emit ProgressChanged(0.80f + 0.20f * fraction); });
 }
 
 void DiffusionCurveRenderer::VectorizationManager::Reset()

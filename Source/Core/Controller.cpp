@@ -76,7 +76,6 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
             { mRenderModes = renderModes; });
     connect(mImGuiWindow, &ImGuiWindow::WorkModeChanged, this, [=](WorkMode workMode)
             { mWorkMode = workMode; });
-
     connect(mImGuiWindow, &ImGuiWindow::ShowColorPointHandlesChanged, this, [=](bool show)
             { mOverlayPainter->SetPaintColorPointHandles(show); });
 
