@@ -16,7 +16,7 @@ vec4 multisample(sampler2DMS sampler, ivec2 coord)
     {
         vec4 texelColor = texelFetch(sampler, coord, i);
 
-        if (texelColor.a > 0.5)
+        if (texelColor.a > 0.1)
         {
             color += texelColor;
             numberOfColoredTexels++;

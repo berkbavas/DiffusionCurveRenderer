@@ -27,7 +27,7 @@ DiffusionCurveRenderer::UpsampleRenderer::UpsampleRenderer()
     mFramebufferFormat.setTextureTarget(GL_TEXTURE_2D);
     mFramebufferFormat.setInternalTextureFormat(GL_RGBA8);
 
-    CreateFramebuffers();
+    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
 void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QVector<QOpenGLFramebufferObject*> downsampleFramebuffers)
@@ -39,22 +39,6 @@ void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QVector<QOpenGLFramebuff
     for (int i = mUpsampleFramebuffers.size() - 2; i >= 0; --i)
     {
         Upsample(mUpsampleFramebuffers[i], mTemporaryFramebuffers[i], mUpsampleFramebuffers[i + 1], downsampleFramebuffers[i]);
-    }
-}
-
-void DiffusionCurveRenderer::UpsampleRenderer::BlitSourceFramebuffer(QOpenGLFramebufferObject* source)
-{
-    for (int attachment = 0; attachment < 2; attachment++)
-    {
-        QOpenGLFramebufferObject::blitFramebuffer(
-            mUpsampleFramebuffers.last(),
-            QRect(0, 0, mUpsampleFramebuffers.last()->width(), mUpsampleFramebuffers.last()->height()),
-            source,
-            QRect(0, 0, source->width(), source->height()),
-            GL_COLOR_BUFFER_BIT,
-            GL_LINEAR,
-            attachment,
-            attachment);
     }
 }
 
@@ -107,7 +91,7 @@ void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QOpenGLFramebufferObject
     }
 }
 
-void DiffusionCurveRenderer::UpsampleRenderer::DeleteFramebuffers()
+void DiffusionCurveRenderer::UpsampleRenderer::SetFramebufferSize(int size)
 {
     for (int i = 0; i < mUpsampleFramebuffers.size(); ++i)
     {
@@ -121,12 +105,8 @@ void DiffusionCurveRenderer::UpsampleRenderer::DeleteFramebuffers()
 
     mUpsampleFramebuffers.clear();
     mTemporaryFramebuffers.clear();
-}
 
-void DiffusionCurveRenderer::UpsampleRenderer::CreateFramebuffers()
-{
     constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    int size = mFramebufferSize;
 
     while (size > 2)
     {
@@ -143,5 +123,21 @@ void DiffusionCurveRenderer::UpsampleRenderer::CreateFramebuffers()
         mTemporaryFramebuffers.last()->release();
 
         size /= 2;
+    }
+}
+
+void DiffusionCurveRenderer::UpsampleRenderer::BlitSourceFramebuffer(QOpenGLFramebufferObject* source)
+{
+    for (int attachment = 0; attachment < 2; attachment++)
+    {
+        QOpenGLFramebufferObject::blitFramebuffer(
+            mUpsampleFramebuffers.last(),
+            QRect(0, 0, mUpsampleFramebuffers.last()->width(), mUpsampleFramebuffers.last()->height()),
+            source,
+            QRect(0, 0, source->width(), source->height()),
+            GL_COLOR_BUFFER_BIT,
+            GL_LINEAR,
+            attachment,
+            attachment);
     }
 }

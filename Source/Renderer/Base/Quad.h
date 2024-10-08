@@ -1,8 +1,6 @@
 #pragma once
 
 #include <QOpenGLExtraFunctions>
-#include <QOpenGLFunctions>
-#include <QOpenGLVertexArrayObject>
 
 namespace DiffusionCurveRenderer
 {
@@ -14,7 +12,7 @@ namespace DiffusionCurveRenderer
         void Render();
 
       private:
-        unsigned int mVertexArray;
-        unsigned int mVertexBuffer;
+        GLuint mVertexArray;
+        GLuint mVertexBuffer;
     };
 }

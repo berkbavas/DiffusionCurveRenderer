@@ -1,10 +1,11 @@
 #include "EventHandler.h"
 
 #include "Core/Constants.h"
+#include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
-#include "Curve/CurveContainer.h"
 #include "Renderer/RendererManager.h"
 #include "Util/Logger.h"
+
 
 DiffusionCurveRenderer::EventHandler::EventHandler(QObject* parent)
     : QObject(parent)

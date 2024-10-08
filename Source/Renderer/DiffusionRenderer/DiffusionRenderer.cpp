@@ -1,10 +1,10 @@
 #include "DiffusionRenderer.h"
 
 #include "Core/Constants.h"
-#include "Renderer/DiffusionRenderer/BlurRenderer.h"
-#include "Renderer/DiffusionRenderer/ColorRenderer.h"
-#include "Renderer/DiffusionRenderer/DownsampleRenderer.h"
-#include "Renderer/DiffusionRenderer/UpsampleRenderer.h"
+#include "Renderer/DiffusionRenderer/Renderers/BlurRenderer.h"
+#include "Renderer/DiffusionRenderer/Renderers/ColorRenderer.h"
+#include "Renderer/DiffusionRenderer/Renderers/DownsampleRenderer.h"
+#include "Renderer/DiffusionRenderer/Renderers/UpsampleRenderer.h"
 #include "Util/Chronometer.h"
 
 void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
@@ -18,43 +18,26 @@ void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
     mDownsampleRenderer = new DownsampleRenderer;
     mUpsampleRenderer = new UpsampleRenderer;
     mBlurRenderer = new BlurRenderer;
-
     mBlurRenderer->SetCamera(mCamera);
     mBlurRenderer->SetCurveContainer(mCurveContainer);
+
+    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::DiffusionRenderer::Render(QOpenGLFramebufferObject* framebuffer)
+void DiffusionCurveRenderer::DiffusionRenderer::Render(QOpenGLFramebufferObject* target)
 {
-    ClearFramebuffer(framebuffer);
-    mColorRenderer->Render(framebuffer);
-    mDownsampleRenderer->Downsample(framebuffer);
+    mColorRenderer->Render(target);
+    mDownsampleRenderer->Downsample(target);
     mUpsampleRenderer->Upsample(mDownsampleRenderer->GetFramebuffers());
-    mBlurRenderer->Blur(mUpsampleRenderer->GetResult());
-}
-
-void DiffusionCurveRenderer::DiffusionRenderer::ClearFramebuffer(QOpenGLFramebufferObject* framebuffer)
-{
-    framebuffer->bind();
-    glViewport(0, 0, framebuffer->width(), framebuffer->height());
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    mBlurRenderer->Blur(target, mUpsampleRenderer->GetResult());
 }
 
 void DiffusionCurveRenderer::DiffusionRenderer::SetFramebufferSize(int newSize)
 {
-    mFramebufferSize = newSize;
-
-    mDownsampleRenderer->DeleteFramebuffers();
-    mUpsampleRenderer->DeleteFramebuffers();
-    mBlurRenderer->DeleteFramebuffer();
-
-    mDownsampleRenderer->SetFramebufferSize(mFramebufferSize);
-    mUpsampleRenderer->SetFramebufferSize(mFramebufferSize);
-    mBlurRenderer->SetFramebufferSize(mFramebufferSize);
-
-    mDownsampleRenderer->CreateFramebuffers();
-    mUpsampleRenderer->CreateFramebuffers();
-    mBlurRenderer->CreateFramebuffer();
+    mColorRenderer->SetFramebufferSize(newSize);
+    mDownsampleRenderer->SetFramebufferSize(newSize);
+    mUpsampleRenderer->SetFramebufferSize(newSize);
+    mBlurRenderer->SetFramebufferSize(newSize);
 }
 
 void DiffusionCurveRenderer::DiffusionRenderer::SetSmoothIterations(int smoothIterations)
@@ -62,9 +45,9 @@ void DiffusionCurveRenderer::DiffusionRenderer::SetSmoothIterations(int smoothIt
     mUpsampleRenderer->SetSmoothIterations(smoothIterations);
 }
 
-QOpenGLFramebufferObject* DiffusionCurveRenderer::DiffusionRenderer::GetResult() const
+void DiffusionCurveRenderer::DiffusionRenderer::SetUseMultisampleFramebuffer(bool val)
 {
-    return mBlurRenderer->GetResult();
+    mColorRenderer->SetUseMultisampleFramebuffer(val);
 }
 
 int DiffusionCurveRenderer::DiffusionRenderer::GetSmoothIterations() const

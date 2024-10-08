@@ -39,11 +39,13 @@ namespace DiffusionCurveRenderer
         void SelectedColorPointChanged(ColorPointPtr point);
 
         void RenderModesChanged(RenderModes modes);
+        void UseMultisampleFramebufferChanged(bool val);
+
+        // Vectorization
         void WorkModeChanged(WorkMode workMode);
         void VectorizationViewOptionChanged(VectorizationViewOption option);
         void GaussianStackLayerChanged(int layer);
         void EdgeStackLayerChanged(int layer);
-
         void LoadImage(const QString& path);
         void Vectorize(VectorizationCurveType curveType, int edgeLevel);
         void ShowColorPointHandlesChanged(bool value);
@@ -72,6 +74,7 @@ namespace DiffusionCurveRenderer
         int mSmoothIterations;
         int mFrambufferSize;
         int mFrambufferSizeIndex;
+        bool mUseMultisampleFramebuffer{ false };
 
         WorkMode mWorkMode{ WorkMode::CurveEditing };
         VectorizationStage mVectorizationStage{ VectorizationStage::Initial };

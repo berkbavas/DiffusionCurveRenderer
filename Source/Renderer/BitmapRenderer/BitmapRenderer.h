@@ -10,10 +10,11 @@
 
 namespace DiffusionCurveRenderer
 {
-    class BitmapRenderer : protected QOpenGLExtraFunctions
+    class BitmapRenderer : QOpenGLExtraFunctions
     {
       public:
         BitmapRenderer();
+
         void Render();
         void SetImage(cv::Mat image, GLenum internalFormat, GLenum externalFormat);
 

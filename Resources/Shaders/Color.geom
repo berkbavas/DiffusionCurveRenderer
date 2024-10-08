@@ -7,7 +7,7 @@ uniform mat4 projection;
 uniform float delta;
 uniform float diffusionWidth;
 uniform float diffusionGap;
-uniform float zoom;
+
 uniform vec2 controlPoints[32];
 uniform int controlPointsCount;
 
@@ -179,8 +179,8 @@ void main()
     float deltaGreen1 = abs(l1.g - r1.g);
     float deltaBlue1 = abs(l1.b - r1.b);
 
-    float width = diffusionWidth * min(zoom, 1.0f);
-    float gap = diffusionGap * min(zoom, 1.0f);
+    float width = diffusionWidth;
+    float gap = diffusionGap;
 
     vec4 b0 = vec4(blurAt(t0) * max(deltaRed0, max(deltaGreen0, deltaBlue0)), 1);
     vec4 b1 = vec4(blurAt(t1) * max(deltaRed1, max(deltaGreen1, deltaBlue1)), 1);

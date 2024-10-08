@@ -22,42 +22,39 @@ DiffusionCurveRenderer::BlurRenderer::BlurRenderer()
 
     mFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
     mFramebufferFormat.setSamples(0);
-    mFramebufferFormat.setMipmap(false);
-    mFramebufferFormat.setTextureTarget(GL_TEXTURE_2D);
-    mFramebufferFormat.setInternalTextureFormat(GL_RGBA8);
 
-    CreateFramebuffer();
+    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::BlurRenderer::Blur(QOpenGLFramebufferObject* framebuffer)
+void DiffusionCurveRenderer::BlurRenderer::Blur(QOpenGLFramebufferObject* target, QOpenGLFramebufferObject* source)
 {
     MEASURE_CALL_TIME(BLUR_RENDERER);
 
-    LastBlurPass(framebuffer);
-    Combine(framebuffer);
+    LastBlurPass(source);
+    Combine(source);
+
+    QOpenGLFramebufferObject::blitFramebuffer(target,
+                                              QRect(0, 0, target->width(), target->height()),
+                                              mFramebuffer.get(),
+                                              QRect(0, 0, mFramebuffer->width(), mFramebuffer->height()),
+                                              GL_COLOR_BUFFER_BIT,
+                                              GL_LINEAR,
+                                              0,
+                                              0);
 }
 
-void DiffusionCurveRenderer::BlurRenderer::DeleteFramebuffer()
-{
-    if (mFramebuffer != nullptr)
-    {
-        delete mFramebuffer;
-        mFramebuffer = nullptr;
-    }
-}
-
-void DiffusionCurveRenderer::BlurRenderer::CreateFramebuffer()
+void DiffusionCurveRenderer::BlurRenderer::SetFramebufferSize(int size)
 {
     constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
-    mFramebuffer = new QOpenGLFramebufferObject(mFramebufferSize, mFramebufferSize, mFramebufferFormat);
-    mFramebuffer->addColorAttachment(mFramebufferSize, mFramebufferSize, GL_RGBA32F);
+    mFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mFramebufferFormat);
+    mFramebuffer->addColorAttachment(size, size);
     mFramebuffer->bind();
     glDrawBuffers(2, ATTACHMENTS);
     mFramebuffer->release();
 }
 
-void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject* framebuffer)
+void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject* source)
 {
     const auto& curves = mCurveContainer->GetCurves();
 
@@ -66,8 +63,8 @@ void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject
         return;
     }
 
-    framebuffer->bind();
-    glViewport(0, 0, framebuffer->width(), framebuffer->height());
+    source->bind();
+    glViewport(0, 0, source->width(), source->height());
 
     mLastBlurPassShader->Bind();
     mInterval->Bind();
@@ -115,7 +112,7 @@ void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject
 
     mInterval->Release();
     mLastBlurPassShader->Release();
-    framebuffer->release();
+    source->release();
 }
 
 void DiffusionCurveRenderer::BlurRenderer::Combine(QOpenGLFramebufferObject* source)

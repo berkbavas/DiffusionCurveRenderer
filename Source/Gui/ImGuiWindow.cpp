@@ -1,6 +1,6 @@
 #include "ImGuiWindow.h"
 
-#include "Curve/CurveContainer.h"
+#include "Core/CurveContainer.h"
 #include "Renderer/RendererManager.h"
 #include "Util/Chronometer.h"
 #include "Util/Logger.h"
@@ -221,8 +221,8 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveHeader()
 
             ImGui::Text("Number of Control Points: %d", (int) mSelectedCurve->GetControlPoints().size());
             ImGui::SliderFloat("Thickness", &mSelectedCurve->GetContourThickness_NonConst(), 1, 20);
-            ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 1, 10);
-            ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 1, 10);
+            ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 0.5f, 10);
+            ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 0.5f, 10);
             ImGui::ColorEdit4("Contour Color", &mSelectedCurve->GetContourColor_NonConst()[0]);
 
             if (ImGui::Button("Remove Curve"))
@@ -273,7 +273,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveHeader()
 
 void DiffusionCurveRenderer::ImGuiWindow::DrawRenderSettings()
 {
-    if (ImGui::CollapsingHeader("Render Settings"))
+    if (ImGui::CollapsingHeader("Render Settings", ImGuiTreeNodeFlags_DefaultOpen))
     {
         if (ImGui::SliderInt("Smooth Iterations", &mSmoothIterations, 2, 50))
             mRendererManager->SetSmoothIterations(mSmoothIterations);
@@ -290,17 +290,20 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawRenderSettings()
         if (ImGui::SliderFloat("Global Thickness", &mGlobalContourThickness, 1.0f, 20.0f))
             mCurveContainer->SetGlobalContourThickness(mGlobalContourThickness);
 
-        if (ImGui::SliderFloat("Global Diffusion Width", &mGlobalDiffusionWidth, 1.0f, 10.0f))
+        if (ImGui::SliderFloat("Global Diffusion Width", &mGlobalDiffusionWidth, 0.5f, 10.0f))
             mCurveContainer->SetGlobalDiffusionWidth(mGlobalDiffusionWidth);
 
-        if (ImGui::SliderFloat("Global Diffusion Gap", &mGlobalDiffusionGap, 1.0f, 10.))
+        if (ImGui::SliderFloat("Global Diffusion Gap", &mGlobalDiffusionGap, 0.5f, 10.0f))
             mCurveContainer->SetGlobalDiffusionGap(mGlobalDiffusionGap);
+
+        if (ImGui::Checkbox("Use Multisample Framebuffer", &mUseMultisampleFramebuffer))
+            emit UseMultisampleFramebufferChanged(mUseMultisampleFramebuffer);
     }
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::DrawStats()
 {
-    if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Stats"))
     {
         for (const auto& ID : ALL_CHORONOMETER_IDs)
             ImGui::Text(Chronometer::Print(ID).c_str());

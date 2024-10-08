@@ -11,15 +11,14 @@ void DiffusionCurveRenderer::RendererManager::Initialize()
     initializeOpenGLFunctions();
 
     mQuad = new Quad;
-
-    mScreenShader = new Shader("Screen Shader");
-    mScreenShader->AddPath(QOpenGLShader::Vertex, ":/Resources/Shaders/Quad.vert");
-    mScreenShader->AddPath(QOpenGLShader::Fragment, ":/Resources/Shaders/Screen.frag");
-    mScreenShader->Initialize();
+    mBlitter = new Blitter;
+    mBlitter->SetCamera(mCamera);
 
     mContourRenderer = new ContourRenderer;
     mContourRenderer->SetCamera(mCamera);
     mContourRenderer->SetCurveContainer(mCurveContainer);
+    mContourRenderer->SetBlitter(mBlitter);
+    mContourRenderer->Initialize();
 
     mDiffusionRenderer = new DiffusionRenderer;
     mDiffusionRenderer->SetCamera(mCamera);
@@ -34,15 +33,12 @@ void DiffusionCurveRenderer::RendererManager::Initialize()
     mBitmapRenderer->SetCamera(mCamera);
 
     mContourFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
-    mContourFramebufferFormat.setSamples(8);
+    mContourFramebufferFormat.setSamples(0);
 
     mDiffusionFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
     mDiffusionFramebufferFormat.setSamples(0);
-    mDiffusionFramebufferFormat.setInternalTextureFormat(GL_RGBA8);
-    mDiffusionFramebufferFormat.setMipmap(false);
-    mDiffusionFramebufferFormat.setTextureTarget(GL_TEXTURE_2D);
 
-    CreateFramebuffers();
+    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
 void DiffusionCurveRenderer::RendererManager::Resize(int width, int height)
@@ -52,7 +48,7 @@ void DiffusionCurveRenderer::RendererManager::Resize(int width, int height)
 
 void DiffusionCurveRenderer::RendererManager::Clear()
 {
-    QOpenGLFramebufferObject::bindDefault();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -60,14 +56,14 @@ void DiffusionCurveRenderer::RendererManager::Clear()
 
 void DiffusionCurveRenderer::RendererManager::RenderDiffusion()
 {
-    mDiffusionRenderer->Render(mDiffusionFramebuffer);
+    mDiffusionRenderer->Render(mDiffusionFramebuffer.get());
 
-    BlitFromResult(mDiffusionRenderer->GetResult());
+    mBlitter->Blit(nullptr, mDiffusionFramebuffer.get(), true);
 }
 
-void DiffusionCurveRenderer::RendererManager::RenderContours(QVector4D* globalColorOption)
+void DiffusionCurveRenderer::RendererManager::RenderContours()
 {
-    mContourRenderer->Render(nullptr, globalColorOption);
+    mContourRenderer->Render(nullptr);
 }
 
 void DiffusionCurveRenderer::RendererManager::RenderForCurveSelection()
@@ -80,32 +76,21 @@ void DiffusionCurveRenderer::RendererManager::RenderCurve(CurvePtr curve)
     mContourRenderer->RenderCurve(nullptr, curve);
 }
 
-void DiffusionCurveRenderer::RendererManager::BlitFromResult(QOpenGLFramebufferObject* result)
+void DiffusionCurveRenderer::RendererManager::SetFramebufferSize(int size)
 {
-    QOpenGLFramebufferObject::bindDefault();
-    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    FramebufferSize = size;
 
-    mScreenShader->Bind();
-    mScreenShader->SetSampler("sourceTexture", 0, result->texture());
-    mQuad->Render();
-    mScreenShader->Release();
-}
+    mContourFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mContourFramebufferFormat);
 
-void DiffusionCurveRenderer::RendererManager::SetFramebufferSize(int newSize)
-{
-    mFramebufferSize = newSize;
+    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
-    DeleteFramebuffers();
-    CreateFramebuffers();
+    mDiffusionFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mDiffusionFramebufferFormat);
+    mDiffusionFramebuffer->addColorAttachment(size, size); // For blur
+    mDiffusionFramebuffer->bind();
+    glDrawBuffers(2, ATTACHMENTS);
+    mDiffusionFramebuffer->release();
 
-    mDiffusionRenderer->SetFramebufferSize(mFramebufferSize);
-}
-
-int DiffusionCurveRenderer::RendererManager::GetSmoothIterations()
-{
-    return mDiffusionRenderer->GetSmoothIterations();
+    mDiffusionRenderer->SetFramebufferSize(size);
 }
 
 void DiffusionCurveRenderer::RendererManager::SetSmoothIterations(int smoothIterations)
@@ -113,35 +98,17 @@ void DiffusionCurveRenderer::RendererManager::SetSmoothIterations(int smoothIter
     mDiffusionRenderer->SetSmoothIterations(smoothIterations);
 }
 
+void DiffusionCurveRenderer::RendererManager::SetUseMultisampleFramebuffer(bool val)
+{
+    mDiffusionRenderer->SetUseMultisampleFramebuffer(val);
+}
+
+int DiffusionCurveRenderer::RendererManager::GetSmoothIterations() const
+{
+    return mDiffusionRenderer->GetSmoothIterations();
+}
+
 DiffusionCurveRenderer::CurveQueryInfo DiffusionCurveRenderer::RendererManager::Query(const QPoint& queryPoint)
 {
     return mCurveSelectionRenderer->Query(queryPoint);
-}
-
-void DiffusionCurveRenderer::RendererManager::CreateFramebuffers()
-{
-    mContourFramebuffer = new QOpenGLFramebufferObject(mFramebufferSize, mFramebufferSize, mContourFramebufferFormat);
-
-    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
-    mDiffusionFramebuffer = new QOpenGLFramebufferObject(mFramebufferSize, mFramebufferSize, mDiffusionFramebufferFormat);
-    mDiffusionFramebuffer->addColorAttachment(mFramebufferSize, mFramebufferSize); // For blur
-    mDiffusionFramebuffer->bind();
-    glDrawBuffers(2, ATTACHMENTS);
-    mDiffusionFramebuffer->release();
-}
-
-void DiffusionCurveRenderer::RendererManager::DeleteFramebuffers()
-{
-    if (mContourFramebuffer != nullptr)
-    {
-        delete mContourFramebuffer;
-        mContourFramebuffer = nullptr;
-    }
-
-    if (mDiffusionFramebuffer != nullptr)
-    {
-        delete mDiffusionFramebuffer;
-        mDiffusionFramebuffer = nullptr;
-    }
 }

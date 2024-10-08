@@ -1,9 +1,9 @@
 #include "Controller.h"
 
 #include "Core/Constants.h"
+#include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
 #include "Core/Window.h"
-#include "Curve/CurveContainer.h"
 #include "EventHandler/EventHandler.h"
 #include "Gui/ImGuiWindow.h"
 #include "Gui/OverlayPainter.h"
@@ -70,8 +70,11 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::SelectedCurveChanged, this, &Controller::OnSelectedCurveChanged);
     connect(mImGuiWindow, &ImGuiWindow::SelectedControlPointChanged, mOverlayPainter, &OverlayPainter::SetSelectedControlPoint);
     connect(mImGuiWindow, &ImGuiWindow::SelectedColorPointChanged, mOverlayPainter, &OverlayPainter::SetSelectedColorPoint);
-
     connect(mImGuiWindow, &ImGuiWindow::SelectedColorPointChanged, mOverlayPainter, &OverlayPainter::SetSelectedColorPoint);
+
+    connect(mImGuiWindow, &ImGuiWindow::UseMultisampleFramebufferChanged, this, [=](bool val)
+            { mRendererManager->SetUseMultisampleFramebuffer(val); });
+
     connect(mImGuiWindow, &ImGuiWindow::RenderModesChanged, this, [=](RenderModes renderModes)
             { mRenderModes = renderModes; });
     connect(mImGuiWindow, &ImGuiWindow::WorkModeChanged, this, [=](WorkMode workMode)
@@ -139,15 +142,17 @@ void DiffusionCurveRenderer::Controller::Render(float ifps)
 
         MEASURE_CALL_TIME(RENDERER_MANAGER);
 
-        mRendererManager->Clear();
-
         if (mWorkMode == WorkMode::CurveEditing)
         {
+            mRendererManager->Clear();
+
+            mRendererManager->RenderDiffusion();
+
             if (mRenderModes.testAnyFlag(RenderMode::Diffusion))
                 mRendererManager->RenderDiffusion();
 
             if (mRenderModes.testAnyFlag(RenderMode::Contour))
-                mRendererManager->RenderContours(nullptr);
+                mRendererManager->RenderContours();
 
             if (mSelectedCurve)
                 mRendererManager->RenderCurve(mSelectedCurve);

@@ -20,7 +20,7 @@ DiffusionCurveRenderer::DownsampleRenderer::DownsampleRenderer()
     mFramebufferFormat.setTextureTarget(GL_TEXTURE_2D);
     mFramebufferFormat.setInternalTextureFormat(GL_RGBA8);
 
-    CreateFramebuffers();
+    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
 void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferObject* source)
@@ -66,7 +66,7 @@ void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferOb
     target->release();
 }
 
-void DiffusionCurveRenderer::DownsampleRenderer::DeleteFramebuffers()
+void DiffusionCurveRenderer::DownsampleRenderer::SetFramebufferSize(int size)
 {
     for (int i = 0; i < mFramebuffers.size(); ++i)
     {
@@ -74,12 +74,7 @@ void DiffusionCurveRenderer::DownsampleRenderer::DeleteFramebuffers()
     }
 
     mFramebuffers.clear();
-}
-
-void DiffusionCurveRenderer::DownsampleRenderer::CreateFramebuffers()
-{
     constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    int size = mFramebufferSize;
 
     while (size > 2)
     {

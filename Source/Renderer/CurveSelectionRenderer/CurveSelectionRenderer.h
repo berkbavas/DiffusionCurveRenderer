@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Constants.h"
+#include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
-#include "Curve/CurveContainer.h"
 #include "Curve/Spline.h"
 #include "Renderer/Base/Interval.h"
 #include "Renderer/Base/Shader.h"

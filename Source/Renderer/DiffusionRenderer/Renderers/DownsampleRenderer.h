@@ -19,8 +19,7 @@ namespace DiffusionCurveRenderer
 
         const QVector<QOpenGLFramebufferObject*>& GetFramebuffers() const { return mFramebuffers; }
 
-        void DeleteFramebuffers();
-        void CreateFramebuffers();
+        void SetFramebufferSize(int size);
 
       private:
         void BlitSourceFramebuffer(QOpenGLFramebufferObject* source);
@@ -30,7 +29,5 @@ namespace DiffusionCurveRenderer
         Shader* mDownsampleShader;
         QOpenGLFramebufferObjectFormat mFramebufferFormat;
         QVector<QOpenGLFramebufferObject*> mFramebuffers;
-
-        DEFINE_MEMBER(int, FramebufferSize, DEFAULT_FRAMEBUFFER_SIZE);
     };
 }

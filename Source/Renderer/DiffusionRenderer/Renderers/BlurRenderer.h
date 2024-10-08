@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Constants.h"
+#include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
-#include "Curve/CurveContainer.h"
 #include "Renderer/Base/Interval.h"
 #include "Renderer/Base/Quad.h"
 #include "Renderer/Base/Shader.h"
@@ -10,6 +10,7 @@
 
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLFramebufferObject>
+#include <memory>
 
 namespace DiffusionCurveRenderer
 {
@@ -18,12 +19,8 @@ namespace DiffusionCurveRenderer
       public:
         BlurRenderer();
 
-        void Blur(QOpenGLFramebufferObject* framebuffer);
-
-        QOpenGLFramebufferObject* GetResult() const { return mFramebuffer; }
-
-        void DeleteFramebuffer();
-        void CreateFramebuffer();
+        void Blur(QOpenGLFramebufferObject* target, QOpenGLFramebufferObject* source);
+        void SetFramebufferSize(int size);
 
       private:
         void LastBlurPass(QOpenGLFramebufferObject* framebuffer);
@@ -34,10 +31,8 @@ namespace DiffusionCurveRenderer
         Shader* mBlurShader;
         Shader* mLastBlurPassShader;
 
-        QOpenGLFramebufferObject* mFramebuffer;
         QOpenGLFramebufferObjectFormat mFramebufferFormat;
-
-        DEFINE_MEMBER(int, FramebufferSize, DEFAULT_FRAMEBUFFER_SIZE);
+        std::unique_ptr<QOpenGLFramebufferObject> mFramebuffer{ nullptr };
 
         DEFINE_MEMBER_PTR(OrthographicCamera, Camera);
         DEFINE_MEMBER_PTR(CurveContainer, CurveContainer);
