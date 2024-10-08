@@ -2,7 +2,6 @@
 
 #include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
-#include "Renderer/Base/Blitter.h"
 #include "Renderer/Base/Interval.h"
 #include "Renderer/Base/Shader.h"
 

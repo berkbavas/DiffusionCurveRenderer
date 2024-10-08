@@ -219,7 +219,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveHeader()
                 ImGui::Text("Curve Type: B-Spline");
             }
 
-            ImGui::Text("Number of Control Points: %d", (int) mSelectedCurve->GetControlPoints().size());
+            ImGui::Text("Number of Control Points: %d", mSelectedCurve->GetControlPoints().size());
             ImGui::SliderFloat("Thickness", &mSelectedCurve->GetContourThickness_NonConst(), 1, 20);
             ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 0.5f, 10);
             ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 0.5f, 10);

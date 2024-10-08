@@ -23,11 +23,11 @@ namespace DiffusionCurveRenderer
         DiffusionRenderer() = default;
 
         void Initialize();
-        void Render(QOpenGLFramebufferObject* target);
+        void Render();
 
         int GetSmoothIterations() const;
 
-        void SetFramebufferSize(int newSize);
+        void SetFramebufferSize(int size);
         void SetSmoothIterations(int smoothIterations);
         void SetUseMultisampleFramebuffer(bool val);
 
@@ -36,6 +36,12 @@ namespace DiffusionCurveRenderer
         DownsampleRenderer* mDownsampleRenderer;
         UpsampleRenderer* mUpsampleRenderer;
         BlurRenderer* mBlurRenderer;
+
+        Shader* mBlitter;
+        Quad* mQuad;
+
+        QOpenGLFramebufferObjectFormat mFramebufferFormat;
+        std::unique_ptr<QOpenGLFramebufferObject> mFramebuffer{ nullptr };
 
         DEFINE_MEMBER_PTR(OrthographicCamera, Camera);
         DEFINE_MEMBER_PTR(CurveContainer, CurveContainer);

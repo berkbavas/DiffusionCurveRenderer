@@ -37,13 +37,6 @@ void DiffusionCurveRenderer::ColorRenderer::Render(QOpenGLFramebufferObject* tar
 
 void DiffusionCurveRenderer::ColorRenderer::RenderPrivate(QOpenGLFramebufferObject* target)
 {
-    const auto& curves = mCurveContainer->GetCurves();
-
-    if (curves.isEmpty())
-    {
-        return;
-    }
-
     target->bind();
     glViewport(0, 0, target->width(), target->height());
     glClearColor(0, 0, 0, 0);
@@ -54,6 +47,8 @@ void DiffusionCurveRenderer::ColorRenderer::RenderPrivate(QOpenGLFramebufferObje
     mColorShader->SetUniformValue("delta", mInterval->GetDelta());
 
     mInterval->Bind();
+
+    const auto& curves = mCurveContainer->GetCurves();
 
     for (const auto& curve : curves)
     {

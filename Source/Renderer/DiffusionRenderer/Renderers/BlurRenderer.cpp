@@ -56,13 +56,6 @@ void DiffusionCurveRenderer::BlurRenderer::SetFramebufferSize(int size)
 
 void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject* source)
 {
-    const auto& curves = mCurveContainer->GetCurves();
-
-    if (curves.isEmpty())
-    {
-        return;
-    }
-
     source->bind();
     glViewport(0, 0, source->width(), source->height());
 
@@ -71,7 +64,8 @@ void DiffusionCurveRenderer::BlurRenderer::LastBlurPass(QOpenGLFramebufferObject
 
     mLastBlurPassShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
     mLastBlurPassShader->SetUniformValue("delta", mInterval->GetDelta());
-    mLastBlurPassShader->SetUniformValue("zoom", mCamera->GetZoom());
+
+    const auto& curves = mCurveContainer->GetCurves();
 
     for (const auto& curve : curves)
     {

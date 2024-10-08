@@ -11,6 +11,13 @@ void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
 {
     initializeOpenGLFunctions();
 
+    mQuad = new Quad;
+
+    mBlitter = new Shader("Blit Shader");
+    mBlitter->AddPath(QOpenGLShader::Vertex, ":/Resources/Shaders/Quad.vert");
+    mBlitter->AddPath(QOpenGLShader::Fragment, ":/Resources/Shaders/Blit.frag");
+    mBlitter->Initialize();
+
     mColorRenderer = new ColorRenderer;
     mColorRenderer->SetCamera(mCamera);
     mColorRenderer->SetCurveContainer(mCurveContainer);
@@ -21,23 +28,37 @@ void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
     mBlurRenderer->SetCamera(mCamera);
     mBlurRenderer->SetCurveContainer(mCurveContainer);
 
+    mFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
+    mFramebufferFormat.setSamples(0);
+
     SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::DiffusionRenderer::Render(QOpenGLFramebufferObject* target)
+void DiffusionCurveRenderer::DiffusionRenderer::Render()
 {
-    mColorRenderer->Render(target);
-    mDownsampleRenderer->Downsample(target);
+    mColorRenderer->Render(mFramebuffer.get());
+    mDownsampleRenderer->Downsample(mFramebuffer.get());
     mUpsampleRenderer->Upsample(mDownsampleRenderer->GetFramebuffers());
-    mBlurRenderer->Blur(target, mUpsampleRenderer->GetResult());
+    mBlurRenderer->Blur(mFramebuffer.get(), mUpsampleRenderer->GetResult());
+
+    // Blit auxilary framebuffer to the default frambuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+
+    mBlitter->Bind();
+    mBlitter->SetSampler("sourceTexture", 0, mFramebuffer.get()->texture());
+    mQuad->Render();
+    mBlitter->Release();
 }
 
-void DiffusionCurveRenderer::DiffusionRenderer::SetFramebufferSize(int newSize)
+void DiffusionCurveRenderer::DiffusionRenderer::SetFramebufferSize(int size)
 {
-    mColorRenderer->SetFramebufferSize(newSize);
-    mDownsampleRenderer->SetFramebufferSize(newSize);
-    mUpsampleRenderer->SetFramebufferSize(newSize);
-    mBlurRenderer->SetFramebufferSize(newSize);
+    mFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mFramebufferFormat);
+
+    mColorRenderer->SetFramebufferSize(size);
+    mDownsampleRenderer->SetFramebufferSize(size);
+    mUpsampleRenderer->SetFramebufferSize(size);
+    mBlurRenderer->SetFramebufferSize(size);
 }
 
 void DiffusionCurveRenderer::DiffusionRenderer::SetSmoothIterations(int smoothIterations)

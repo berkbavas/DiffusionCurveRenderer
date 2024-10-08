@@ -14,39 +14,14 @@ void DiffusionCurveRenderer::ContourRenderer::Initialize()
     mBezierShader->Initialize();
 
     mInterval = new Interval(0, 1, NUMBER_OF_INTERVALS);
-
-    // Temporary
-    mMultisampleFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
-    mMultisampleFramebufferFormat.setSamples(0);
-
-    // Multisample
-    mFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
-    mFramebufferFormat.setSamples(8);
-
-    SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::ContourRenderer::SetFramebufferSize(int size)
-{
-    mFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mFramebufferFormat);
-    mMultisampleFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mMultisampleFramebufferFormat);
-}
-
-void DiffusionCurveRenderer::ContourRenderer::Render(QOpenGLFramebufferObject* target, bool clearTarget)
+void DiffusionCurveRenderer::ContourRenderer::Render()
 {
     MEASURE_CALL_TIME(CONTOUR_RENDERER);
 
-    const auto& curves = mCurveContainer->GetCurves();
-
-    if (curves.isEmpty())
-    {
-        return;
-    }
-
-    mMultisampleFramebuffer->bind();
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, mMultisampleFramebuffer->width(), mMultisampleFramebuffer->height());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
@@ -54,6 +29,8 @@ void DiffusionCurveRenderer::ContourRenderer::Render(QOpenGLFramebufferObject* t
     mBezierShader->SetUniformValue("delta", mInterval->GetDelta());
 
     mInterval->Bind();
+
+    const auto& curves = mCurveContainer->GetCurves();
 
     for (const auto& curve : curves)
     {
@@ -61,34 +38,13 @@ void DiffusionCurveRenderer::ContourRenderer::Render(QOpenGLFramebufferObject* t
     }
 
     mInterval->Release();
-
     mBezierShader->Release();
-    mMultisampleFramebuffer->release();
-
-    // Blit to temporary
-    QOpenGLFramebufferObject::blitFramebuffer(mFramebuffer.get(), mMultisampleFramebuffer.get());
-
-    mBlitter->Blit(target, mFramebuffer.get(), clearTarget);
 }
 
-void DiffusionCurveRenderer::ContourRenderer::RenderCurve(QOpenGLFramebufferObject* target, CurvePtr curve, bool clearTarget)
+void DiffusionCurveRenderer::ContourRenderer::RenderCurve(CurvePtr curve)
 {
-    if (target == nullptr) // Default framebuffer
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
-    }
-    else
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, target->handle());
-        glViewport(0, 0, target->width(), target->height());
-    }
-
-    if (clearTarget)
-    {
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
@@ -96,13 +52,13 @@ void DiffusionCurveRenderer::ContourRenderer::RenderCurve(QOpenGLFramebufferObje
     mBezierShader->SetUniformValue("delta", mInterval->GetDelta());
 
     mInterval->Bind();
-    RenderCurve(curve);
+    RenderCurveInner(curve);
     mInterval->Release();
 
     mBezierShader->Release();
 }
 
-void DiffusionCurveRenderer::ContourRenderer::RenderCurve(CurvePtr curve)
+void DiffusionCurveRenderer::ContourRenderer::RenderCurveInner(CurvePtr curve)
 {
     if (const auto bezier = std::dynamic_pointer_cast<Bezier>(curve))
     {

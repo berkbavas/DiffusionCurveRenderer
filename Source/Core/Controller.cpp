@@ -146,8 +146,6 @@ void DiffusionCurveRenderer::Controller::Render(float ifps)
         {
             mRendererManager->Clear();
 
-            mRendererManager->RenderDiffusion();
-
             if (mRenderModes.testAnyFlag(RenderMode::Diffusion))
                 mRendererManager->RenderDiffusion();
 

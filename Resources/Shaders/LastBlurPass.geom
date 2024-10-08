@@ -6,7 +6,6 @@ layout(triangle_strip, max_vertices = 4) out;
 uniform mat4 projection;
 uniform float delta;
 uniform float diffusionWidth;
-uniform float zoom;
 
 uniform vec2 controlPoints[32];
 uniform int controlPointsCount;
@@ -110,7 +109,7 @@ void main()
     vec2 n1 = normalAt(t1);
 
     // For blur
-    float width = diffusionWidth * min(zoom, 1.0f);
+    float width = diffusionWidth;
 
     vec4 b0 = vec4(blurAt(t0), 1);
     vec4 b1 = vec4(blurAt(t1), 1);

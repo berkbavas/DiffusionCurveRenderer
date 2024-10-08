@@ -3,7 +3,6 @@
 #include "Core/Constants.h"
 #include "Core/CurveContainer.h"
 #include "Core/OrthographicCamera.h"
-#include "Renderer/Base/Blitter.h"
 #include "Renderer/Base/MultisampleFramebuffer.h"
 #include "Renderer/Base/Quad.h"
 #include "Renderer/Base/Shader.h"
@@ -34,6 +33,7 @@ namespace DiffusionCurveRenderer
         void RenderContours();
         void RenderForCurveSelection();
         void RenderCurve(CurvePtr curve);
+        ;
 
         BitmapRenderer* GetBitmapRenderer() { return mBitmapRenderer; }
 
@@ -51,15 +51,6 @@ namespace DiffusionCurveRenderer
         DiffusionRenderer* mDiffusionRenderer;
         CurveSelectionRenderer* mCurveSelectionRenderer;
         BitmapRenderer* mBitmapRenderer;
-
-        Blitter* mBlitter;
-        Quad* mQuad;
-
-        QOpenGLFramebufferObjectFormat mContourFramebufferFormat;
-        QOpenGLFramebufferObjectFormat mDiffusionFramebufferFormat;
-
-        std::unique_ptr<QOpenGLFramebufferObject> mDiffusionFramebuffer{ nullptr };
-        std::unique_ptr<QOpenGLFramebufferObject> mContourFramebuffer{ nullptr };
 
         int FramebufferSize{ DEFAULT_FRAMEBUFFER_SIZE };
 

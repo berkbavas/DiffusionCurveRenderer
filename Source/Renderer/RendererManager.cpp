@@ -10,14 +10,9 @@ void DiffusionCurveRenderer::RendererManager::Initialize()
 {
     initializeOpenGLFunctions();
 
-    mQuad = new Quad;
-    mBlitter = new Blitter;
-    mBlitter->SetCamera(mCamera);
-
     mContourRenderer = new ContourRenderer;
     mContourRenderer->SetCamera(mCamera);
     mContourRenderer->SetCurveContainer(mCurveContainer);
-    mContourRenderer->SetBlitter(mBlitter);
     mContourRenderer->Initialize();
 
     mDiffusionRenderer = new DiffusionRenderer;
@@ -31,12 +26,6 @@ void DiffusionCurveRenderer::RendererManager::Initialize()
 
     mBitmapRenderer = new BitmapRenderer;
     mBitmapRenderer->SetCamera(mCamera);
-
-    mContourFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
-    mContourFramebufferFormat.setSamples(0);
-
-    mDiffusionFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
-    mDiffusionFramebufferFormat.setSamples(0);
 
     SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
@@ -56,14 +45,12 @@ void DiffusionCurveRenderer::RendererManager::Clear()
 
 void DiffusionCurveRenderer::RendererManager::RenderDiffusion()
 {
-    mDiffusionRenderer->Render(mDiffusionFramebuffer.get());
-
-    mBlitter->Blit(nullptr, mDiffusionFramebuffer.get(), true);
+    mDiffusionRenderer->Render();
 }
 
 void DiffusionCurveRenderer::RendererManager::RenderContours()
 {
-    mContourRenderer->Render(nullptr);
+    mContourRenderer->Render();
 }
 
 void DiffusionCurveRenderer::RendererManager::RenderForCurveSelection()
@@ -73,23 +60,12 @@ void DiffusionCurveRenderer::RendererManager::RenderForCurveSelection()
 
 void DiffusionCurveRenderer::RendererManager::RenderCurve(CurvePtr curve)
 {
-    mContourRenderer->RenderCurve(nullptr, curve);
+    mContourRenderer->RenderCurve(curve);
 }
 
 void DiffusionCurveRenderer::RendererManager::SetFramebufferSize(int size)
 {
     FramebufferSize = size;
-
-    mContourFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mContourFramebufferFormat);
-
-    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
-    mDiffusionFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mDiffusionFramebufferFormat);
-    mDiffusionFramebuffer->addColorAttachment(size, size); // For blur
-    mDiffusionFramebuffer->bind();
-    glDrawBuffers(2, ATTACHMENTS);
-    mDiffusionFramebuffer->release();
-
     mDiffusionRenderer->SetFramebufferSize(size);
 }
 

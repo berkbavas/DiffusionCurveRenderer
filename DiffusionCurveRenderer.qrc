@@ -8,7 +8,6 @@
         <file>Resources/Shaders/Quad.vert</file>
         <file>Resources/Shaders/Downsample.frag</file>
         <file>Resources/Shaders/Jacobi.frag</file>
-        <file>Resources/Shaders/Screen.frag</file>
         <file>Resources/Shaders/Upsample.frag</file>
         <file>Resources/Shaders/Blur.frag</file>
         <file>Resources/Shaders/ScreenMultisample.frag</file>
@@ -18,5 +17,6 @@
         <file>Resources/Shaders/CurveSelection.frag</file>
         <file>Resources/Shaders/Bitmap.vert</file>
         <file>Resources/Shaders/Bitmap.frag</file>
+        <file>Resources/Shaders/Blit.frag</file>
     </qresource>
 </RCC>

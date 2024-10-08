@@ -4,7 +4,7 @@ Reconstructing images using Bezier curves and diffusing colors constrained by th
 
 The ideas belong to [Orzan et al.](https://hal.archives-ouvertes.fr/inria-00274768/)
 
-Vectorization algorithms are taken form this [repo](https://github.com/zhuethanca/DiffusionCurves) and adopted.
+Vectorization algorithms are taken from this [repo](https://github.com/zhuethanca/DiffusionCurves) and adopted.
 
 The project is developed using `OpenGL`, `OpenCV`, `Eigen`, `ImGui` and `Qt` and is written in `C++`.
 
