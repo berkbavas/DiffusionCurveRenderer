@@ -22,7 +22,7 @@ void DiffusionCurveRenderer::ImGuiWindow::Draw()
     mGlobalDiffusionGap = mCurveContainer->GetGlobalDiffusionGap();
     mSmoothIterations = mRendererManager->GetSmoothIterations();
     mFrambufferSize = mRendererManager->GetFramebufferSize();
-    mFrambufferSizeIndex = std::log2(mFrambufferSize / 512);
+    mFrambufferSizeIndex = std::log2(mFrambufferSize / 1024);
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_MenuBar);
     DrawMenuBar();
@@ -172,7 +172,17 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
 
             ImGui::Separator();
 
-            ImGui::MenuItem("Save as PNG");
+            if (ImGui::MenuItem("Save as PNG"))
+            {
+                QString path = QFileDialog::getSaveFileName(nullptr, "PNG File", "", "*.png");
+
+                if (path.isNull() == false)
+                {
+                    qDebug() << "ImGuiWindow::DrawMenuBar(Save as PNG): Path is" << path;
+                    emit SaveAsPng(path);
+                }
+            }
+
             ImGui::MenuItem("Export as JSON");
 
             ImGui::EndMenu();
@@ -287,9 +297,9 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawRenderSettings()
         if (ImGui::SliderInt("Smooth Iterations", &mSmoothIterations, 2, 50))
             mRendererManager->SetSmoothIterations(mSmoothIterations);
 
-        if (ImGui::SliderInt("Frambuffer Size", &mFrambufferSizeIndex, 0, 3, FRAME_BUFFER_SIZES[mFrambufferSizeIndex]))
+        if (ImGui::SliderInt("Frambuffer Size", &mFrambufferSizeIndex, 0, 2, FRAME_BUFFER_SIZES[mFrambufferSizeIndex]))
         {
-            mFrambufferSize = 512 * std::exp2(mFrambufferSizeIndex);
+            mFrambufferSize = 1024 * std::exp2(mFrambufferSizeIndex);
             mRendererManager->SetFramebufferSize(mFrambufferSize);
         }
 

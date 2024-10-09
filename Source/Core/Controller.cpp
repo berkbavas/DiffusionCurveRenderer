@@ -95,6 +95,12 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
                 mCurveContainer->AddCurves(curves); //
             });
 
+    connect(mImGuiWindow, &ImGuiWindow::SaveAsPng, this, [=](const QString& path)
+            {
+                mRendererManager->Save(path, mRenderModes); //
+            },
+            Qt::DirectConnection);
+
     connect(mImGuiWindow, &ImGuiWindow::LoadImage, mVectorizationManager, &VectorizationManager::LoadImage, Qt::QueuedConnection);
     connect(mImGuiWindow, &ImGuiWindow::Vectorize, mVectorizationManager, &VectorizationManager::Vectorize, Qt::QueuedConnection);
 

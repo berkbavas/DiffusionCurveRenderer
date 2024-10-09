@@ -16,12 +16,20 @@ void DiffusionCurveRenderer::ContourRenderer::Initialize()
     mInterval = new Interval(0, 1, NUMBER_OF_INTERVALS);
 }
 
-void DiffusionCurveRenderer::ContourRenderer::Render()
+void DiffusionCurveRenderer::ContourRenderer::Render(QOpenGLFramebufferObject* target)
 {
     MEASURE_CALL_TIME(CONTOUR_RENDERER);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    if (target == nullptr)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    }
+    else
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, target->handle());
+        glViewport(0, 0, target->width(), target->height());
+    }
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
@@ -33,17 +41,25 @@ void DiffusionCurveRenderer::ContourRenderer::Render()
 
     for (const auto& curve : curves)
     {
-        RenderCurve(curve);
+        RenderCurveInner(curve);
     }
 
     mInterval->Release();
     mBezierShader->Release();
 }
 
-void DiffusionCurveRenderer::ContourRenderer::RenderCurve(CurvePtr curve)
+void DiffusionCurveRenderer::ContourRenderer::RenderCurve(CurvePtr curve, QOpenGLFramebufferObject* target)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    if (target == nullptr)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    }
+    else
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, target->handle());
+        glViewport(0, 0, target->width(), target->height());
+    }
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());

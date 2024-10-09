@@ -22,7 +22,7 @@ namespace DiffusionCurveRenderer
         DiffusionRenderer() = default;
 
         void Initialize();
-        void Render();
+        void Render(QOpenGLFramebufferObject* target = nullptr);
 
         int GetSmoothIterations() const;
 

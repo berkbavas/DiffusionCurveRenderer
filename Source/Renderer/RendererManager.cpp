@@ -6,6 +6,8 @@
 #include "Renderer/DiffusionRenderer/DiffusionRenderer.h"
 #include "Util/Chronometer.h"
 
+#include <QImage>
+
 void DiffusionCurveRenderer::RendererManager::Initialize()
 {
     initializeOpenGLFunctions();
@@ -61,6 +63,25 @@ void DiffusionCurveRenderer::RendererManager::RenderForCurveSelection()
 void DiffusionCurveRenderer::RendererManager::RenderCurve(CurvePtr curve)
 {
     mContourRenderer->RenderCurve(curve);
+}
+
+void DiffusionCurveRenderer::RendererManager::Save(const QString& path, RenderModes renderModes)
+{
+    mSaveFramebuffer = std::make_unique<QOpenGLFramebufferObject>(mCamera->GetWidth(), mCamera->GetHeight());
+
+    // Clear
+    glBindFramebuffer(GL_FRAMEBUFFER, mSaveFramebuffer->handle());
+    glViewport(0, 0, mSaveFramebuffer->width(), mSaveFramebuffer->height());
+    glClearColor(1, 1, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (renderModes.testAnyFlags(RenderMode::Diffusion))
+        mDiffusionRenderer->Render(mSaveFramebuffer.get());
+
+    if (renderModes.testAnyFlag(RenderMode::Contour))
+        mContourRenderer->Render(mSaveFramebuffer.get());
+
+    mSaveFramebuffer->toImage().save(path);
 }
 
 void DiffusionCurveRenderer::RendererManager::SetFramebufferSize(int size)

@@ -30,15 +30,23 @@ void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
     SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::DiffusionRenderer::Render()
+void DiffusionCurveRenderer::DiffusionRenderer::Render(QOpenGLFramebufferObject* target)
 {
     mColorRenderer->Render(mFramebuffer.get());
     mDownsampleRenderer->Downsample(mFramebuffer.get());
     mUpsampleRenderer->Upsample(mDownsampleRenderer->GetFramebuffers());
 
-    // Blit auxilary framebuffer to the default frambuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    if (target == nullptr)
+    {
+        // Blit auxilary framebuffer to the default frambuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
+    }
+    else
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, target->handle());
+        glViewport(0, 0, target->width(), target->height());
+    }
 
     mBlitter->Bind();
     mBlitter->SetSampler("sourceTexture", 0, mUpsampleRenderer->GetResult()->texture());

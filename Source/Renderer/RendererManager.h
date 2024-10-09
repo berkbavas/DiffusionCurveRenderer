@@ -33,7 +33,8 @@ namespace DiffusionCurveRenderer
         void RenderContours();
         void RenderForCurveSelection();
         void RenderCurve(CurvePtr curve);
-        ;
+
+        void Save(const QString& path, RenderModes renderModes);
 
         BitmapRenderer* GetBitmapRenderer() { return mBitmapRenderer; }
 
@@ -53,6 +54,8 @@ namespace DiffusionCurveRenderer
         BitmapRenderer* mBitmapRenderer;
 
         int FramebufferSize{ DEFAULT_FRAMEBUFFER_SIZE };
+
+        std::unique_ptr<QOpenGLFramebufferObject> mSaveFramebuffer{ nullptr };
 
         DEFINE_MEMBER_PTR(OrthographicCamera, Camera);
         DEFINE_MEMBER_PTR(CurveContainer, CurveContainer);

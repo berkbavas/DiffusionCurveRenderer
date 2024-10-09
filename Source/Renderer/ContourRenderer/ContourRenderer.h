@@ -20,8 +20,8 @@ namespace DiffusionCurveRenderer
 
         void Initialize();
 
-        void Render();
-        void RenderCurve(CurvePtr curve);
+        void Render(QOpenGLFramebufferObject* target = nullptr);
+        void RenderCurve(CurvePtr curve, QOpenGLFramebufferObject* target = nullptr);
 
       private:
         void RenderCurveInner(CurvePtr curve);

@@ -43,6 +43,7 @@ namespace DiffusionCurveRenderer
         void UseMultisampleFramebufferChanged(bool val);
 
         void ImportXml(const QString& path);
+        void SaveAsPng(const QString& path);
 
         // Vectorization
         void WorkModeChanged(WorkMode workMode);
@@ -101,6 +102,6 @@ namespace DiffusionCurveRenderer
         DEFINE_MEMBER_PTR(RendererManager, RendererManager);
         DEFINE_MEMBER(bool, ImageLoaded, false);
 
-        static constexpr const char* FRAME_BUFFER_SIZES[4] = { "512", "1024", "2048", "4096" };
+        static constexpr const char* FRAME_BUFFER_SIZES[3] = { "1024", "2048", "4096" };
     };
 }
