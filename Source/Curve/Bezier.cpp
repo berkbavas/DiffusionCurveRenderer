@@ -472,3 +472,98 @@ QVector4D DiffusionCurveRenderer::Bezier::GetRightColorAt(float t)
 
     return QVector4D(0, 0, 0, 0);
 }
+
+QJsonObject DiffusionCurveRenderer::Bezier::ToJsonObject()
+{
+    QJsonArray controlPoints;
+
+    for (const auto& point : mControlPoints)
+    {
+        QJsonObject object;
+        object.insert("x", point->position.x());
+        object.insert("y", point->position.y());
+        controlPoints.append(object);
+    }
+
+    QJsonArray colorPoints;
+
+    for (const auto& point : mColorPoints)
+    {
+        QJsonObject object;
+        object.insert("t", static_cast<int>(point->type));
+        object.insert("p", point->position);
+        object.insert("r", point->color.x());
+        object.insert("g", point->color.y());
+        object.insert("b", point->color.z());
+
+        colorPoints.append(object);
+    }
+
+    QJsonArray blurPoints;
+
+    for (const auto& point : mBlurPoints)
+    {
+        QJsonObject object;
+        object.insert("p", point->position);
+        object.insert("s", point->strength);
+        colorPoints.append(object);
+    }
+
+    QJsonObject object;
+    object.insert("control_points", controlPoints);
+    object.insert("color_points", colorPoints);
+    object.insert("blur_points", blurPoints);
+
+    return object;
+}
+
+DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::Bezier::FromJsonObject(QJsonObject object)
+{
+    BezierPtr bezier = std::make_shared<Bezier>();
+
+    QJsonArray controlPoints = object.value("control_points").toArray();
+    QJsonArray colorPoints = object.value("color_points").toArray();
+    QJsonArray blurPoints = object.value("blur_points").toArray();
+
+    for (const auto& point : controlPoints)
+    {
+        const auto controlPoint = point.toObject();
+
+        if (controlPoint.isEmpty() == false)
+        {
+            float x = controlPoint.value("x").toDouble();
+            float y = controlPoint.value("y").toDouble();
+            bezier->AddControlPoint(QVector2D(x, y));
+        }
+    }
+
+    for (const auto& point : colorPoints)
+    {
+        const auto colorPoint = point.toObject();
+
+        if (colorPoint.isEmpty() == false)
+        {
+            float position = colorPoint.value("p").toDouble();
+            float r = colorPoint.value("r").toDouble();
+            float g = colorPoint.value("g").toDouble();
+            float b = colorPoint.value("b").toDouble();
+            float type = colorPoint.value("t").toInt();
+
+            bezier->AddColorPoint(static_cast<ColorPointType>(type), QVector4D(r, g, b, 1.0f), position);
+        }
+    }
+
+    for (const auto& point : blurPoints)
+    {
+        const auto blurPoint = point.toObject();
+        if (blurPoint.isEmpty() == false)
+        {
+            float position = blurPoint.value("p").toDouble();
+            float strength = blurPoint.value("s").toDouble();
+
+            bezier->AddBlurPoint(position, strength);
+        }
+    }
+
+    return bezier;
+}

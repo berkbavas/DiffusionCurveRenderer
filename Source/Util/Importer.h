@@ -10,5 +10,6 @@ namespace DiffusionCurveRenderer
         Importer() = delete;
 
         static QVector<CurvePtr> ImportFromXml(const QString& filename);
+        static QVector<CurvePtr> ImportFromJson(const QString& filename);
     };
 }

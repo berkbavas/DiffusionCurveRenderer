@@ -46,6 +46,9 @@ namespace DiffusionCurveRenderer
         float TransformToPatch(float t) const;
         float TransformToSpline(int patchIndex, float t) const;
 
+        QJsonObject ToJsonObject();
+        static CurvePtr FromJsonObject(QJsonObject object);
+
       private:
         Eigen::MatrixXf CreateCoefficientMatrix();
         QVector<QVector2D> GetSplineControlPoints();

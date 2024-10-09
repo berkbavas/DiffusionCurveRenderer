@@ -144,7 +144,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Load an image for vectorization"))
+            if (ImGui::MenuItem("Open an image for vectorization"))
             {
                 QString path = QFileDialog::getOpenFileName(nullptr, "Select an image", "", "*.png *.jpg *.jpeg *.bmp");
 
@@ -168,7 +168,16 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
                 }
             }
 
-            ImGui::MenuItem("Import JSON");
+            if (ImGui::MenuItem("Import JSON"))
+            {
+                QString path = QFileDialog::getOpenFileName(nullptr, "Select JSON File", "", "*.json");
+
+                if (path.isNull() == false)
+                {
+                    qDebug() << "ImGuiWindow::DrawMenuBar(Import JSON): Path is" << path;
+                    emit ImportJson(path);
+                }
+            }
 
             ImGui::Separator();
 
@@ -183,7 +192,16 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
                 }
             }
 
-            ImGui::MenuItem("Export as JSON");
+            if (ImGui::MenuItem("Export as JSON"))
+            {
+                QString path = QFileDialog::getSaveFileName(nullptr, "JSON File", "", "*.json");
+
+                if (path.isNull() == false)
+                {
+                    qDebug() << "ImGuiWindow::DrawMenuBar(Export as JSON): Path is" << path;
+                    emit ExportAsJson(path);
+                }
+            }
 
             ImGui::EndMenu();
         }

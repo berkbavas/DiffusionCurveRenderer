@@ -19,7 +19,7 @@ QVector<DiffusionCurveRenderer::CurvePtr> DiffusionCurveRenderer::Importer::Impo
 
     if (file.open(QIODevice::ReadOnly) == false)
     {
-        LOG_FATAL("An error occured while loading '{}'", filename.toStdString());
+        qFatal() << "Importer::ImportFromXml: An error occured while loading '{}'" << filename.toStdString();
         return {};
     }
 
@@ -94,6 +94,57 @@ QVector<DiffusionCurveRenderer::CurvePtr> DiffusionCurveRenderer::Importer::Impo
         curves << curve;
 
         component = component.nextSibling().toElement();
+    }
+
+    return curves;
+}
+
+QVector<DiffusionCurveRenderer::CurvePtr> DiffusionCurveRenderer::Importer::ImportFromJson(const QString& filename)
+{
+    // Read the file
+    QFile file(filename);
+
+    if (file.open(QIODevice::ReadOnly) == false)
+    {
+        qFatal() << "Importer::ImportFromJson: An error occured while loading '{}'" << filename.toStdString();
+        return {};
+    }
+
+    QJsonParseError parseError;
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parseError);
+
+    file.close();
+
+    if (parseError.error != QJsonParseError::NoError)
+    {
+        qFatal() << "Importer::ImportFromJson: Parse error at" << parseError.offset << ":" << parseError.errorString();
+        return {};
+    }
+
+    const auto root = document.object();
+
+    const auto splines = root.value("spline_curves").toArray();
+    const auto beziers = root.value("bezier_curves").toArray();
+
+    QVector<CurvePtr> curves;
+    for (const auto spline : splines)
+    {
+        const auto splineObject = spline.toObject();
+
+        if (splineObject.isEmpty() == false)
+        {
+            curves << Spline::FromJsonObject(splineObject);
+        }
+    }
+
+    for (const auto bezier : beziers)
+    {
+        const auto bezierObject = bezier.toObject();
+
+        if (bezierObject.isEmpty() == false)
+        {
+            curves << Bezier::FromJsonObject(bezierObject);
+        }
     }
 
     return curves;

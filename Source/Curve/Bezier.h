@@ -3,6 +3,8 @@
 #include "Curve.h"
 #include "Util/Macros.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QObject>
 #include <Vector>
 #include <memory>
@@ -71,6 +73,9 @@ namespace DiffusionCurveRenderer
 
         const QVector<ColorPointPtr>& GetColorPoints() const { return mColorPoints; };
         const QVector<BlurPointPtr>& GetBlurPoints() const { return mBlurPoints; };
+
+        QJsonObject ToJsonObject();
+        static CurvePtr FromJsonObject(QJsonObject object);
 
       private:
         QVector<float> GetCoefficients() const;

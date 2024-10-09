@@ -10,6 +10,7 @@
 #include "Renderer/BitmapRenderer/BitmapRenderer.h"
 #include "Renderer/RendererManager.h"
 #include "Util/Chronometer.h"
+#include "Util/Exporter.h"
 #include "Util/Importer.h"
 #include "Util/Logger.h"
 #include "Vectorization/VectorizationManager.h"
@@ -86,20 +87,42 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::GaussianStackLayerChanged, this, &Controller::OnGaussianStackLayerChanged);
     connect(mImGuiWindow, &ImGuiWindow::EdgeStackLayerChanged, this, &Controller::OnEdgeStackLayerChanged);
     connect(mImGuiWindow, &ImGuiWindow::ClearCanvas, this, &Controller::ClearCanvas);
-    connect(mImGuiWindow, &ImGuiWindow::ImportXml, this, [=](const QString& path)
-            {
-                ClearCanvas();
-                mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
-                mImGuiWindow->SetRenderMode(RenderMode::Contour, false);
-                const auto& curves = Importer::ImportFromXml(path);
-                mCurveContainer->AddCurves(curves); //
-            });
 
     connect(mImGuiWindow, &ImGuiWindow::SaveAsPng, this, [=](const QString& path)
             {
                 mRendererManager->Save(path, mRenderModes); //
-            },
-            Qt::DirectConnection);
+            });
+
+    connect(mImGuiWindow, &ImGuiWindow::ExportAsJson, this, [=](const QString& path)
+            {
+                Exporter::ExportAsJson(mCurveContainer->GetCurves(), path); //
+            });
+
+    connect(mImGuiWindow, &ImGuiWindow::ImportXml, this, [=](const QString& path)
+            {
+                const auto& curves = Importer::ImportFromXml(path);
+
+                if (curves.isEmpty() == false)
+                {
+                    ClearCanvas();
+                    mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
+                    mImGuiWindow->SetRenderMode(RenderMode::Contour, true);
+                    mCurveContainer->AddCurves(curves);
+                } //
+            });
+
+    connect(mImGuiWindow, &ImGuiWindow::ImportJson, this, [=](const QString& path)
+            {
+                const auto& curves = Importer::ImportFromJson(path);
+
+                if (curves.isEmpty() == false)
+                {
+                    ClearCanvas();
+                    mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
+                    mImGuiWindow->SetRenderMode(RenderMode::Contour, true);
+                    mCurveContainer->AddCurves(curves);
+                } //
+            });
 
     connect(mImGuiWindow, &ImGuiWindow::LoadImage, mVectorizationManager, &VectorizationManager::LoadImage, Qt::QueuedConnection);
     connect(mImGuiWindow, &ImGuiWindow::Vectorize, mVectorizationManager, &VectorizationManager::Vectorize, Qt::QueuedConnection);

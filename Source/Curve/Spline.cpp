@@ -146,7 +146,7 @@ void DiffusionCurveRenderer::Spline::Update()
         }
     }
 
-    for (const auto patch : mBezierPatches)
+    for (const auto& patch : mBezierPatches)
     {
         patch->RemoveAllControlPoints();
     }
@@ -372,4 +372,67 @@ DiffusionCurveRenderer::ColorPointPtr DiffusionCurveRenderer::Spline::FindColorP
     }
 
     return nullptr;
+}
+
+QJsonObject DiffusionCurveRenderer::Spline::ToJsonObject()
+{
+    QJsonArray controlPoints;
+
+    for (const auto& point : mControlPoints)
+    {
+        QJsonObject object;
+        object.insert("x", point->position.x());
+        object.insert("y", point->position.y());
+        controlPoints.append(object);
+    }
+
+    QJsonArray patches;
+
+    for (const auto& patch : mBezierPatches)
+    {
+        patches.append(patch->ToJsonObject());
+    }
+
+    QJsonObject object;
+    object.insert("control_points", controlPoints);
+    object.insert("patches", patches);
+
+    return object;
+}
+
+DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::Spline::FromJsonObject(QJsonObject object)
+{
+    SplinePtr spline = std::make_shared<Spline>();
+
+    QJsonArray controlPoints = object.value("control_points").toArray();
+
+    for (const auto& point : controlPoints)
+    {
+        const auto controlPoint = point.toObject();
+
+        if (controlPoint.isEmpty() == false)
+        {
+            float x = controlPoint.value("x").toDouble();
+            float y = controlPoint.value("y").toDouble();
+            spline->mControlPoints << std::make_shared<ControlPoint>(QVector2D(x, y));
+        }
+    }
+
+    QJsonArray patches = object.value("patches").toArray();
+
+    for (const auto& patch : patches)
+    {
+        const auto patchObject = patch.toObject();
+
+        if (patchObject.isEmpty() == false)
+        {
+            CurvePtr bezier = Bezier::FromJsonObject(patchObject);
+            spline->mBezierPatches << std::dynamic_pointer_cast<Bezier>(bezier);
+        }
+    }
+
+    spline->mIsPointAddedOrRemoved = true;
+    spline->Update();
+
+    return spline;
 }

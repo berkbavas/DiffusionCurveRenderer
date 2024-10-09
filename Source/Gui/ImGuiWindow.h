@@ -44,6 +44,8 @@ namespace DiffusionCurveRenderer
 
         void ImportXml(const QString& path);
         void SaveAsPng(const QString& path);
+        void ImportJson(const QString& path);
+        void ExportAsJson(const QString& path);
 
         // Vectorization
         void WorkModeChanged(WorkMode workMode);
