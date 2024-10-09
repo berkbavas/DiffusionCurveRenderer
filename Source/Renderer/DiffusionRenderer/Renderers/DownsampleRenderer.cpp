@@ -37,18 +37,15 @@ void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferOb
 
 void DiffusionCurveRenderer::DownsampleRenderer::BlitSourceFramebuffer(QOpenGLFramebufferObject* source)
 {
-    for (int attachment = 0; attachment < 2; attachment++)
-    {
-        QOpenGLFramebufferObject::blitFramebuffer(
-            mFramebuffers[0],
-            QRect(0, 0, mFramebuffers[0]->width(), mFramebuffers[0]->height()),
-            source,
-            QRect(0, 0, source->width(), source->height()),
-            GL_COLOR_BUFFER_BIT,
-            GL_LINEAR,
-            attachment,
-            attachment);
-    }
+    QOpenGLFramebufferObject::blitFramebuffer(
+        mFramebuffers[0],
+        QRect(0, 0, mFramebuffers[0]->width(), mFramebuffers[0]->height()),
+        source,
+        QRect(0, 0, source->width(), source->height()),
+        GL_COLOR_BUFFER_BIT,
+        GL_LINEAR,
+        0,
+        0);
 }
 
 void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferObject* source, QOpenGLFramebufferObject* target)
@@ -60,7 +57,6 @@ void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferOb
 
     mDownsampleShader->Bind();
     mDownsampleShader->SetSampler("colorTexture", 0, source->textures().at(0));
-    mDownsampleShader->SetSampler("blurTexture", 1, source->textures().at(1));
     mQuad->Render();
     mDownsampleShader->Release();
     target->release();
@@ -74,16 +70,10 @@ void DiffusionCurveRenderer::DownsampleRenderer::SetFramebufferSize(int size)
     }
 
     mFramebuffers.clear();
-    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
     while (size > 2)
     {
         mFramebuffers << new QOpenGLFramebufferObject(size, size, mFramebufferFormat);
-        mFramebuffers.last()->addColorAttachment(size, size); // For blur
-        mFramebuffers.last()->bind();
-        glDrawBuffers(2, ATTACHMENTS);
-        mFramebuffers.last()->release();
-
         size /= 2;
     }
 }

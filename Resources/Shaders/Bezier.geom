@@ -9,7 +9,6 @@ uniform mat4 projection;
 uniform vec4 color;
 uniform vec2 controlPoints[32];
 uniform float thickness;
-uniform float zoom;
 uniform float delta;
 uniform int numberOfControlPoints;
 
@@ -92,7 +91,7 @@ void main()
     vec2 n0 = normalAt(t0);
     vec2 n1 = normalAt(t1);
 
-    float width = thickness * zoom;
+    float width = thickness;
 
     gl_Position = projection * vec4(v0 + 0.5 * width * n0, 0, 1);
     fs_Color = color;

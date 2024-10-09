@@ -20,7 +20,6 @@ void DiffusionCurveRenderer::ImGuiWindow::Draw()
     mGlobalContourThickness = mCurveContainer->GetGlobalContourThickness();
     mGlobalDiffusionWidth = mCurveContainer->GetGlobalDiffusionWidth();
     mGlobalDiffusionGap = mCurveContainer->GetGlobalDiffusionGap();
-    mGlobalBlurStrength = mCurveContainer->GetGlobalBlurStrength();
     mSmoothIterations = mRendererManager->GetSmoothIterations();
     mFrambufferSize = mRendererManager->GetFramebufferSize();
     mFrambufferSizeIndex = std::log2(mFrambufferSize / 512);
@@ -283,9 +282,6 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawRenderSettings()
             mFrambufferSize = 512 * std::exp2(mFrambufferSizeIndex);
             mRendererManager->SetFramebufferSize(mFrambufferSize);
         }
-
-        if (ImGui::SliderFloat("Global Blur Strength", &mGlobalBlurStrength, 0.0f, 1.0f))
-            mCurveContainer->SetGlobalBlurStrength(mGlobalBlurStrength);
 
         if (ImGui::SliderFloat("Global Thickness", &mGlobalContourThickness, 1.0f, 20.0f))
             mCurveContainer->SetGlobalContourThickness(mGlobalContourThickness);

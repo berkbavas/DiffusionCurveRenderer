@@ -30,15 +30,15 @@ DiffusionCurveRenderer::UpsampleRenderer::UpsampleRenderer()
     SetFramebufferSize(DEFAULT_FRAMEBUFFER_SIZE);
 }
 
-void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QVector<QOpenGLFramebufferObject*> downsampleFramebuffers)
+void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QVector<QOpenGLFramebufferObject*> downsamples)
 {
     MEASURE_CALL_TIME(UPSAMPLE_RENDERER);
 
-    BlitSourceFramebuffer(downsampleFramebuffers.last());
+    BlitSourceFramebuffer(downsamples.last());
 
     for (int i = mUpsampleFramebuffers.size() - 2; i >= 0; --i)
     {
-        Upsample(mUpsampleFramebuffers[i], mTemporaryFramebuffers[i], mUpsampleFramebuffers[i + 1], downsampleFramebuffers[i]);
+        Upsample(mUpsampleFramebuffers[i], mTemporaryFramebuffers[i], mUpsampleFramebuffers[i + 1], downsamples[i]);
     }
 }
 
@@ -52,8 +52,6 @@ void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QOpenGLFramebufferObject
     mUpsampleShader->Bind();
     mUpsampleShader->SetSampler("colorSourceTexture", 0, source->textures().at(0));
     mUpsampleShader->SetSampler("colorTargetTexture", 1, constraint->textures().at(0));
-    mUpsampleShader->SetSampler("blurSourceTexture", 2, source->textures().at(1));
-    mUpsampleShader->SetSampler("blurTargetTexture", 3, constraint->textures().at(1));
     mQuad->Render();
     mUpsampleShader->Release();
 
@@ -67,8 +65,6 @@ void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QOpenGLFramebufferObject
             mJacobiShader->Bind();
             mJacobiShader->SetSampler("colorConstrainedTexture", 0, constraint->textures().at(0));
             mJacobiShader->SetSampler("colorTargetTexture", 1, target->textures().at(0));
-            mJacobiShader->SetSampler("blurConstrainedTexture", 2, constraint->textures().at(1));
-            mJacobiShader->SetSampler("blurTargetTexture", 3, target->textures().at(1));
             mQuad->Render();
             mJacobiShader->Release();
             temporary->release();
@@ -82,8 +78,6 @@ void DiffusionCurveRenderer::UpsampleRenderer::Upsample(QOpenGLFramebufferObject
             mJacobiShader->Bind();
             mJacobiShader->SetSampler("colorConstrainedTexture", 0, constraint->textures().at(0));
             mJacobiShader->SetSampler("colorTargetTexture", 1, temporary->textures().at(0));
-            mJacobiShader->SetSampler("blurConstrainedTexture", 2, constraint->textures().at(1));
-            mJacobiShader->SetSampler("blurTargetTexture", 3, temporary->textures().at(1));
             mQuad->Render();
             mJacobiShader->Release();
             target->release();
@@ -106,21 +100,11 @@ void DiffusionCurveRenderer::UpsampleRenderer::SetFramebufferSize(int size)
     mUpsampleFramebuffers.clear();
     mTemporaryFramebuffers.clear();
 
-    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
     while (size > 2)
     {
         mUpsampleFramebuffers << new QOpenGLFramebufferObject(size, size, mFramebufferFormat);
-        mUpsampleFramebuffers.last()->addColorAttachment(size, size); // For blur
-        mUpsampleFramebuffers.last()->bind();
-        glDrawBuffers(2, ATTACHMENTS);
-        mUpsampleFramebuffers.last()->release();
 
         mTemporaryFramebuffers << new QOpenGLFramebufferObject(size, size, mFramebufferFormat);
-        mTemporaryFramebuffers.last()->addColorAttachment(size, size); // For blur
-        mTemporaryFramebuffers.last()->bind();
-        glDrawBuffers(2, ATTACHMENTS);
-        mTemporaryFramebuffers.last()->release();
 
         size /= 2;
     }
@@ -128,16 +112,12 @@ void DiffusionCurveRenderer::UpsampleRenderer::SetFramebufferSize(int size)
 
 void DiffusionCurveRenderer::UpsampleRenderer::BlitSourceFramebuffer(QOpenGLFramebufferObject* source)
 {
-    for (int attachment = 0; attachment < 2; attachment++)
-    {
-        QOpenGLFramebufferObject::blitFramebuffer(
-            mUpsampleFramebuffers.last(),
-            QRect(0, 0, mUpsampleFramebuffers.last()->width(), mUpsampleFramebuffers.last()->height()),
-            source,
-            QRect(0, 0, source->width(), source->height()),
-            GL_COLOR_BUFFER_BIT,
-            GL_LINEAR,
-            attachment,
-            attachment);
-    }
+    QOpenGLFramebufferObject::blitFramebuffer(mUpsampleFramebuffers.last(),
+                                              QRect(0, 0, mUpsampleFramebuffers.last()->width(), mUpsampleFramebuffers.last()->height()),
+                                              source,
+                                              QRect(0, 0, source->width(), source->height()),
+                                              GL_COLOR_BUFFER_BIT,
+                                              GL_LINEAR,
+                                              0,
+                                              0);
 }

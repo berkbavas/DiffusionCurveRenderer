@@ -11,9 +11,9 @@ namespace DiffusionCurveRenderer
     constexpr int INITIAL_HEIGHT = 900;
 
     // Diffusion
-    constexpr float DEFAULT_DIFFUSION_GAP = 1.0f;
-    constexpr float DEFAULT_DIFFUSION_WIDTH = 4.0f;
-    constexpr float DEFAULT_CONTOUR_THICKNESS = 16.0f;
+    constexpr float DEFAULT_DIFFUSION_GAP = 0.75f;
+    constexpr float DEFAULT_DIFFUSION_WIDTH = 0.75f;
+    constexpr float DEFAULT_CONTOUR_THICKNESS = 4.0f;
     constexpr float DEFAULT_BLUR_STRENGTH = 0.25f;
     constexpr int DEFAULT_SMOOTH_ITERATIONS = 20;
 

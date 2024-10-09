@@ -25,7 +25,6 @@ void DiffusionCurveRenderer::ContourRenderer::Render()
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
-    mBezierShader->SetUniformValue("zoom", mCamera->GetZoom());
     mBezierShader->SetUniformValue("delta", mInterval->GetDelta());
 
     mInterval->Bind();
@@ -48,7 +47,6 @@ void DiffusionCurveRenderer::ContourRenderer::RenderCurve(CurvePtr curve)
 
     mBezierShader->Bind();
     mBezierShader->SetUniformValue("projection", mCamera->GetProjectionMatrix());
-    mBezierShader->SetUniformValue("zoom", mCamera->GetZoom());
     mBezierShader->SetUniformValue("delta", mInterval->GetDelta());
 
     mInterval->Bind();

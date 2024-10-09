@@ -1,7 +1,6 @@
 #include "DiffusionRenderer.h"
 
 #include "Core/Constants.h"
-#include "Renderer/DiffusionRenderer/Renderers/BlurRenderer.h"
 #include "Renderer/DiffusionRenderer/Renderers/ColorRenderer.h"
 #include "Renderer/DiffusionRenderer/Renderers/DownsampleRenderer.h"
 #include "Renderer/DiffusionRenderer/Renderers/UpsampleRenderer.h"
@@ -24,9 +23,6 @@ void DiffusionCurveRenderer::DiffusionRenderer::Initialize()
 
     mDownsampleRenderer = new DownsampleRenderer;
     mUpsampleRenderer = new UpsampleRenderer;
-    mBlurRenderer = new BlurRenderer;
-    mBlurRenderer->SetCamera(mCamera);
-    mBlurRenderer->SetCurveContainer(mCurveContainer);
 
     mFramebufferFormat.setAttachment(QOpenGLFramebufferObject::NoAttachment);
     mFramebufferFormat.setSamples(0);
@@ -39,14 +35,13 @@ void DiffusionCurveRenderer::DiffusionRenderer::Render()
     mColorRenderer->Render(mFramebuffer.get());
     mDownsampleRenderer->Downsample(mFramebuffer.get());
     mUpsampleRenderer->Upsample(mDownsampleRenderer->GetFramebuffers());
-    mBlurRenderer->Blur(mFramebuffer.get(), mUpsampleRenderer->GetResult());
 
     // Blit auxilary framebuffer to the default frambuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
 
     mBlitter->Bind();
-    mBlitter->SetSampler("sourceTexture", 0, mFramebuffer.get()->texture());
+    mBlitter->SetSampler("sourceTexture", 0, mUpsampleRenderer->GetResult()->texture());
     mQuad->Render();
     mBlitter->Release();
 }
@@ -58,7 +53,6 @@ void DiffusionCurveRenderer::DiffusionRenderer::SetFramebufferSize(int size)
     mColorRenderer->SetFramebufferSize(size);
     mDownsampleRenderer->SetFramebufferSize(size);
     mUpsampleRenderer->SetFramebufferSize(size);
-    mBlurRenderer->SetFramebufferSize(size);
 }
 
 void DiffusionCurveRenderer::DiffusionRenderer::SetSmoothIterations(int smoothIterations)

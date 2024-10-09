@@ -19,14 +19,9 @@ uniform vec4 rightColors[32];
 uniform float rightColorPositions[32];
 uniform int rightColorsCount;
 
-uniform float blurPointPositions[32];
-uniform float blurPointStrengths[32];
-uniform int blurPointsCount;
-
 in float gs_Point[];
 
 out vec4 fs_Color;
-out vec4 fs_Blur;
 
 float customPow(float x, float y)
 {
@@ -136,23 +131,6 @@ vec4 rightColorAt(float t)
     return vec4(0);
 }
 
-vec3 blurAt(float t)
-{
-    for (int i = 1; i < blurPointsCount; i++)
-    {
-        float t0 = blurPointPositions[i - 1];
-        float t1 = blurPointPositions[i];
-
-        if (t0 <= t && t <= t1)
-        {
-            float mixedStrength = mix(blurPointStrengths[i - 1], blurPointStrengths[i], (t - t0) / (t1 - t0));
-            return vec3(mixedStrength, mixedStrength, mixedStrength);
-        }
-    }
-
-    return vec3(0);
-}
-
 void main()
 {
     float t0 = gs_Point[0];
@@ -170,41 +148,25 @@ void main()
     vec4 r0 = rightColorAt(t0);
     vec4 r1 = rightColorAt(t1);
 
-    // For blur
-    float deltaRed0 = abs(l0.r - r0.r);
-    float deltaGreen0 = abs(l0.g - r0.g);
-    float deltaBlue0 = abs(l0.b - r0.b);
-
-    float deltaRed1 = abs(l1.r - r1.r);
-    float deltaGreen1 = abs(l1.g - r1.g);
-    float deltaBlue1 = abs(l1.b - r1.b);
-
     float width = diffusionWidth;
     float gap = diffusionGap;
-
-    vec4 b0 = vec4(blurAt(t0) * max(deltaRed0, max(deltaGreen0, deltaBlue0)), 1);
-    vec4 b1 = vec4(blurAt(t1) * max(deltaRed1, max(deltaGreen1, deltaBlue1)), 1);
 
     // Left side
     {
         gl_Position = projection * vec4(v0 - 0.5f * gap * n0, 0, 1);
         fs_Color = l0;
-        fs_Blur = b0;
         EmitVertex();
 
         gl_Position = projection * vec4(v0 - 0.5f * gap * n0 - 1.0f * width * n0, 0, 1);
         fs_Color = l0;
-        fs_Blur = b0;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 - 0.5f * gap * n1, 0, 1);
         fs_Color = l1;
-        fs_Blur = b1;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 - 0.5f * gap * n1 - 1.0f * width * n1, 0, 1);
         fs_Color = l1;
-        fs_Blur = b1;
         EmitVertex();
 
         EndPrimitive();
@@ -214,22 +176,18 @@ void main()
     {
         gl_Position = projection * vec4(v0 + 0.5f * gap * n0, 0, 1);
         fs_Color = r0;
-        fs_Blur = b0;
         EmitVertex();
 
         gl_Position = projection * vec4(v0 + 0.5f * gap * n0 + 1.0f * width * n0, 0, 1);
         fs_Color = r0;
-        fs_Blur = b0;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 + 0.5f * gap * n1, 0, 1);
         fs_Color = r1;
-        fs_Blur = b1;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 + 0.5f * gap * n1 + 1.0f * width * n1, 0, 1);
         fs_Color = r1;
-        fs_Blur = b1;
         EmitVertex();
 
         EndPrimitive();

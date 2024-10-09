@@ -1,12 +1,10 @@
 #version 450 core
 
 uniform sampler2D colorTexture;
-uniform sampler2D blurTexture;
 
 in vec2 fs_TextureCoords;
 
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outBlur;
 
 void main()
 {
@@ -47,51 +45,24 @@ void main()
     weights[7] = 2; // s
     weights[8] = 1; // se
 
-    // Colors
+    vec4 colors[9];
+
+    for (int i = 0; i < 9; i++)
+        colors[i] = texture(colorTexture, vectors[i]);
+
+    float colorTotalWeight = 0;
+    vec4 color = vec4(0);
+    for (int i = 0; i < 9; i++)
     {
-        vec4 colors[9];
-
-        for (int i = 0; i < 9; i++)
-            colors[i] = texture(colorTexture, vectors[i]);
-
-        float colorTotalWeight = 0;
-        vec4 color = vec4(0);
-        for (int i = 0; i < 9; i++)
+        if (colors[i].a > 0.1f)
         {
-            if (colors[i].a > 0.1f)
-            {
-                color += weights[i] * colors[i];
-                colorTotalWeight += weights[i];
-            }
+            color += weights[i] * colors[i];
+            colorTotalWeight += weights[i];
         }
-
-        if (colorTotalWeight > 0)
-            outColor = color / colorTotalWeight;
-        else
-            outColor = vec4(0, 0, 0, 0);
     }
 
-    // Blur
-    {
-        vec4 blurs[9];
-
-        for (int i = 0; i < 9; i++)
-            blurs[i] = texture(blurTexture, vectors[i]);
-
-        float blurTotalWeight = 0;
-        vec4 blur = vec4(0);
-        for (int i = 0; i < 9; i++)
-        {
-            if (blurs[i].a > 0.1f)
-            {
-                blur += weights[i] * blurs[i];
-                blurTotalWeight += weights[i];
-            }
-        }
-
-        if (blurTotalWeight > 0)
-            outBlur = blur / blurTotalWeight;
-        else
-            outBlur = vec4(0, 0, 0, 0);
-    }
+    if (colorTotalWeight > 0)
+        outColor = color / colorTotalWeight;
+    else
+        outColor = vec4(0, 0, 0, 0);
 }

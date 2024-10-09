@@ -96,33 +96,21 @@ void DiffusionCurveRenderer::ColorRenderer::SetUniforms(BezierPtr curve)
     mColorShader->SetUniformValueArray("rightColors", curve->GetRightColors());
     mColorShader->SetUniformValueFloatArray("rightColorPositions", curve->GetRightColorPositions());
     mColorShader->SetUniformValue("rightColorsCount", curve->GetNumberOfRightColors());
-    mColorShader->SetUniformValueFloatArray("blurPointPositions", curve->GetBlurPointPositions());
-    mColorShader->SetUniformValueFloatArray("blurPointStrengths", curve->GetBlurPointStrengths());
-    mColorShader->SetUniformValue("blurPointsCount", curve->GetNumberOfBlurPoints());
 }
 
 void DiffusionCurveRenderer::ColorRenderer::SetFramebufferSize(int size)
 {
-    constexpr GLuint ATTACHMENTS[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
     mMultisampleFramebuffer = std::make_unique<QOpenGLFramebufferObject>(size, size, mMultisampleFramebufferFormat);
-    mMultisampleFramebuffer->addColorAttachment(size, size);
-    mMultisampleFramebuffer->bind();
-    glDrawBuffers(2, ATTACHMENTS);
-    mMultisampleFramebuffer->release();
 }
 
 void DiffusionCurveRenderer::ColorRenderer::BlitFramebuffer(QOpenGLFramebufferObject* source, QOpenGLFramebufferObject* target)
 {
-    for (int attachment = 0; attachment < 2; attachment++)
-    {
-        QOpenGLFramebufferObject::blitFramebuffer(target,
-                                                  QRect(0, 0, target->width(), target->height()),
-                                                  source,
-                                                  QRect(0, 0, source->width(), source->height()),
-                                                  GL_COLOR_BUFFER_BIT,
-                                                  GL_LINEAR,
-                                                  attachment,
-                                                  attachment);
-    }
+    QOpenGLFramebufferObject::blitFramebuffer(target,
+                                              QRect(0, 0, target->width(), target->height()),
+                                              source,
+                                              QRect(0, 0, source->width(), source->height()),
+                                              GL_COLOR_BUFFER_BIT,
+                                              GL_LINEAR,
+                                              0,
+                                              0);
 }

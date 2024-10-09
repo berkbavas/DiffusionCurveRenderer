@@ -15,7 +15,7 @@ namespace DiffusionCurveRenderer
       public:
         UpsampleRenderer();
 
-        void Upsample(QVector<QOpenGLFramebufferObject*> downsampleFramebuffers);
+        void Upsample(QVector<QOpenGLFramebufferObject*> downsamples);
 
         QOpenGLFramebufferObject* GetResult() const { return mUpsampleFramebuffers.first(); }
 

@@ -5,11 +5,7 @@ in vec2 fs_TextureCoords;
 uniform sampler2D colorConstrainedTexture;
 uniform sampler2D colorTargetTexture;
 
-uniform sampler2D blurConstrainedTexture;
-uniform sampler2D blurTargetTexture;
-
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outBlur;
 
 void main()
 {
@@ -84,37 +80,5 @@ void main()
             outColor = color / totalWeight;
         else
             outColor = vec4(1, 1, 1, 1);
-    }
-
-    // Blur
-    vec4 blur = texture(blurConstrainedTexture, fs_TextureCoords);
-
-    if (blur.a > 0.1f)
-    {
-        outBlur = blur;
-    }
-    else
-    {
-        vec4 blurs[9];
-
-        for (int i = 0; i < 9; i++)
-            blurs[i] = texture(blurTargetTexture, vectors[i]);
-
-        float totalWeight = 0;
-        vec4 blur = vec4(0, 0, 0, 0);
-
-        for (int i = 0; i < 9; i++)
-        {
-            if (blurs[i].a > 0)
-            {
-                blur += weights[i] * blurs[i];
-                totalWeight += weights[i];
-            }
-        }
-
-        if (totalWeight > 0)
-            outBlur = blur / totalWeight;
-        else
-            outBlur = vec4(1, 1, 1, 1);
     }
 }

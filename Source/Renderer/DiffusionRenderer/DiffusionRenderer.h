@@ -15,7 +15,6 @@ namespace DiffusionCurveRenderer
     class ColorRenderer;
     class DownsampleRenderer;
     class UpsampleRenderer;
-    class BlurRenderer;
 
     class DiffusionRenderer : protected QOpenGLExtraFunctions
     {
@@ -35,7 +34,6 @@ namespace DiffusionCurveRenderer
         ColorRenderer* mColorRenderer;
         DownsampleRenderer* mDownsampleRenderer;
         UpsampleRenderer* mUpsampleRenderer;
-        BlurRenderer* mBlurRenderer;
 
         Shader* mBlitter;
         Quad* mQuad;

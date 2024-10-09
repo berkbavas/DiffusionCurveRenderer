@@ -321,10 +321,6 @@ DiffusionCurveRenderer::ColorPointPtr DiffusionCurveRenderer::Spline::AddColorPo
     if (BezierPtr patch = GetBezierPatchAt(position))
     {
         const auto transformed = TransformToPatch(position);
-        // qDebug() << "Spline::AddColorPoint: Position on Spline: " << position
-        //          << "Position on Bezier:" << transformed
-        //          << "Patch:" << GetBezierPatchIndexAt(position);
-
         return patch->AddColorPoint(type, color, transformed);
     }
 

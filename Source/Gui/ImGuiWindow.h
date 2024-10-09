@@ -70,7 +70,6 @@ namespace DiffusionCurveRenderer
         float mGlobalContourThickness;
         float mGlobalDiffusionWidth;
         float mGlobalDiffusionGap;
-        float mGlobalBlurStrength;
         int mSmoothIterations;
         int mFrambufferSize;
         int mFrambufferSizeIndex;
