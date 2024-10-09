@@ -150,14 +150,24 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
 
                 if (path.isNull() == false)
                 {
-                    qDebug() << "ImGuiWindow::DrawMenuBar: Path is" << path;
+                    qDebug() << "ImGuiWindow::DrawMenuBar(Select an image): Path is" << path;
                     emit LoadImage(path);
                 }
             }
 
             ImGui::Separator();
 
-            ImGui::MenuItem("Import XML");
+            if (ImGui::MenuItem("Import XML"))
+            {
+                QString path = QFileDialog::getOpenFileName(nullptr, "Select XML File", "", "*.xml");
+
+                if (path.isNull() == false)
+                {
+                    qDebug() << "ImGuiWindow::DrawMenuBar(Import XML): Path is" << path;
+                    emit ImportXml(path);
+                }
+            }
+
             ImGui::MenuItem("Import JSON");
 
             ImGui::Separator();
@@ -220,8 +230,8 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveHeader()
 
             ImGui::Text("Number of Control Points: %d", mSelectedCurve->GetControlPoints().size());
             ImGui::SliderFloat("Thickness", &mSelectedCurve->GetContourThickness_NonConst(), 1, 20);
-            ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 0.5f, 10);
-            ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 0.5f, 10);
+            ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 0.5f, 4.0f);
+            ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 0.5f, 4.0f);
             ImGui::ColorEdit4("Contour Color", &mSelectedCurve->GetContourColor_NonConst()[0]);
 
             if (ImGui::Button("Remove Curve"))
@@ -286,14 +296,19 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawRenderSettings()
         if (ImGui::SliderFloat("Global Thickness", &mGlobalContourThickness, 1.0f, 20.0f))
             mCurveContainer->SetGlobalContourThickness(mGlobalContourThickness);
 
-        if (ImGui::SliderFloat("Global Diffusion Width", &mGlobalDiffusionWidth, 0.5f, 10.0f))
+        if (ImGui::SliderFloat("Global Diffusion Width", &mGlobalDiffusionWidth, 0.5f, 4.0f))
             mCurveContainer->SetGlobalDiffusionWidth(mGlobalDiffusionWidth);
 
-        if (ImGui::SliderFloat("Global Diffusion Gap", &mGlobalDiffusionGap, 0.5f, 10.0f))
+        if (ImGui::SliderFloat("Global Diffusion Gap", &mGlobalDiffusionGap, 0.5f, 4.0f))
             mCurveContainer->SetGlobalDiffusionGap(mGlobalDiffusionGap);
 
         if (ImGui::Checkbox("Use Multisample Framebuffer", &mUseMultisampleFramebuffer))
             emit UseMultisampleFramebufferChanged(mUseMultisampleFramebuffer);
+
+        if (ImGui::Button("Clear Canvas"))
+        {
+            emit ClearCanvas();
+        }
     }
 }
 

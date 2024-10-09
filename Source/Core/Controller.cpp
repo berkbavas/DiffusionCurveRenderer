@@ -85,6 +85,15 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mImGuiWindow, &ImGuiWindow::VectorizationViewOptionChanged, this, &Controller::OnVectorizationViewOptionChanged);
     connect(mImGuiWindow, &ImGuiWindow::GaussianStackLayerChanged, this, &Controller::OnGaussianStackLayerChanged);
     connect(mImGuiWindow, &ImGuiWindow::EdgeStackLayerChanged, this, &Controller::OnEdgeStackLayerChanged);
+    connect(mImGuiWindow, &ImGuiWindow::ClearCanvas, this, &Controller::ClearCanvas);
+    connect(mImGuiWindow, &ImGuiWindow::ImportXml, this, [=](const QString& path)
+            {
+                ClearCanvas();
+                mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
+                mImGuiWindow->SetRenderMode(RenderMode::Contour, false);
+                const auto& curves = Importer::ImportFromXml(path);
+                mCurveContainer->AddCurves(curves); //
+            });
 
     connect(mImGuiWindow, &ImGuiWindow::LoadImage, mVectorizationManager, &VectorizationManager::LoadImage, Qt::QueuedConnection);
     connect(mImGuiWindow, &ImGuiWindow::Vectorize, mVectorizationManager, &VectorizationManager::Vectorize, Qt::QueuedConnection);
@@ -290,6 +299,12 @@ void DiffusionCurveRenderer::Controller::OnImageLoaded(cv::Mat image)
     mWindow->doneCurrent();
 }
 
+void DiffusionCurveRenderer::Controller::ClearCanvas()
+{
+    OnSelectedCurveChanged(nullptr);
+    mCurveContainer->Clear();
+}
+
 void DiffusionCurveRenderer::Controller::OnGaussianStackLayerChanged(int layer)
 {
     cv::Mat image = mVectorizationManager->GetGaussianStackLayer(layer);
@@ -319,10 +334,8 @@ void DiffusionCurveRenderer::Controller::OnVectorizationStageFinished(Vectorizat
 
 void DiffusionCurveRenderer::Controller::OnVectorizationFinished(const QVector<CurvePtr>& curves)
 {
-    OnSelectedCurveChanged(nullptr);
-    mCurveContainer->Clear();
+    ClearCanvas();
     mCurveContainer->AddCurves(curves);
-
     mImGuiWindow->SetRenderMode(RenderMode::Diffusion, true);
     mImGuiWindow->SetRenderMode(RenderMode::Contour, false);
     SetWorkMode(WorkMode::CurveEditing);

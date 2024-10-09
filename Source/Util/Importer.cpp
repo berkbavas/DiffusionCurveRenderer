@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-QVector<DiffusionCurveRenderer::CurvePtr> DiffusionCurveRenderer::Importer::LoadCurveDataFromXml(const QString& filename)
+QVector<DiffusionCurveRenderer::CurvePtr> DiffusionCurveRenderer::Importer::ImportFromXml(const QString& filename)
 {
     QDomDocument document;
 

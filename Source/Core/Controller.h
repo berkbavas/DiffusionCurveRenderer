@@ -58,6 +58,7 @@ namespace DiffusionCurveRenderer
       private:
         void OnSelectedCurveChanged(CurvePtr selectedCurve);
         void SetWorkMode(WorkMode workMode);
+        void ClearCanvas();
 
         float mDevicePixelRatio{ 1.0f };
         float mWidth{ INITIAL_WIDTH };

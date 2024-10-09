@@ -9,6 +9,6 @@ namespace DiffusionCurveRenderer
       public:
         Importer() = delete;
 
-        static QVector<CurvePtr> LoadCurveDataFromXml(const QString& filename);
+        static QVector<CurvePtr> ImportFromXml(const QString& filename);
     };
 }

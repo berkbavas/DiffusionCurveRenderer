@@ -37,9 +37,12 @@ namespace DiffusionCurveRenderer
         void SelectedCurveChanged(CurvePtr selectedCurve);
         void SelectedControlPointChanged(ControlPointPtr point);
         void SelectedColorPointChanged(ColorPointPtr point);
+        void ClearCanvas();
 
         void RenderModesChanged(RenderModes modes);
         void UseMultisampleFramebufferChanged(bool val);
+
+        void ImportXml(const QString& path);
 
         // Vectorization
         void WorkModeChanged(WorkMode workMode);
