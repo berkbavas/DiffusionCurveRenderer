@@ -9,15 +9,48 @@ DiffusionCurveRenderer::BezierCurveConstructor::BezierCurveConstructor(QObject* 
 
 void DiffusionCurveRenderer::BezierCurveConstructor::Run(const QVector<QVector<Point>>& polylines)
 {
-    for (int i = 0; i < polylines.size(); i++)
-    {
-        float progress = float(i) / (polylines.size() - 1);
-        emit ProgressChanged(progress);
+    constexpr int NUMBER_OF_POINTS_PER_POLYLINE = 8;
+    const auto nPolylines = polylines.size();
 
-        if (CurvePtr curve = ConstructCurve(polylines.at(i)))
+    for (int i = 0; i < nPolylines; i++)
+    {
+        const auto& polyline = polylines.at(i);
+        const auto nPoints = polyline.size();
+
+        if (nPoints > NUMBER_OF_POINTS_PER_POLYLINE)
+        {
+            const auto numberOfSmallerSegments = nPoints / NUMBER_OF_POINTS_PER_POLYLINE + 1;
+            for (int indexOfSmallerSegments = 0; indexOfSmallerSegments < numberOfSmallerSegments; ++indexOfSmallerSegments)
+            {
+                QVector<Point> smaller;
+
+                for (int j = 0; j < NUMBER_OF_POINTS_PER_POLYLINE; j++)
+                {
+                    const auto indexOfPoint = NUMBER_OF_POINTS_PER_POLYLINE * indexOfSmallerSegments + j;
+                    if (indexOfPoint >= polyline.size())
+                    {
+                        if (smaller.size() == 1)
+                        {
+                            smaller.append(polyline.at(indexOfPoint - 2));
+                        }
+                        break;
+                    }
+
+                    smaller.append(polyline.at(indexOfPoint));
+                }
+
+                if (CurvePtr curve = ConstructCurve(smaller))
+                {
+                    mCurves << curve;
+                }
+            }
+        }
+        else if (CurvePtr curve = ConstructCurve(polyline))
         {
             mCurves << curve;
         }
+
+        emit ProgressChanged(float(i) / (nPolylines - 1));
     }
 
     emit Finished();
