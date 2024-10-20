@@ -12,33 +12,43 @@ void DiffusionCurveRenderer::ColorSampler::Run(const QVector<CurvePtr>& curves, 
 
     for (int i = 0; i < nCurves; i++)
     {
-        float progress = float(i) / (nCurves - 1);
-        emit ProgressChanged(progress);
 
         CurvePtr curve = curves[i];
 
-        SampleAlongNormal(curve, 0.0f, ColorPointType::Left, image, imageLab);
-        SampleAlongNormal(curve, 0.0f, ColorPointType::Right, image, imageLab);
-
-        SampleAlongNormal(curve, 0.5, ColorPointType::Left, image, imageLab);
-        SampleAlongNormal(curve, 0.5, ColorPointType::Right, image, imageLab);
-
-        SampleAlongNormal(curve, 1.0f, ColorPointType::Left, image, imageLab);
-        SampleAlongNormal(curve, 1.0f, ColorPointType::Right, image, imageLab);
-
-        int nSamples = sampleDensity * curve->CalculateLength();
-
-        for (int i = 0; i < nSamples - 3; i++)
+        if (BezierPtr bezier = std::dynamic_pointer_cast<Bezier>(curve))
         {
-            SampleAlongNormal(curve, mRandomGenerator.bounded(1.0f), ColorPointType::Left, image, imageLab);
-            SampleAlongNormal(curve, mRandomGenerator.bounded(1.0f), ColorPointType::Right, image, imageLab);
+            Sample(bezier, image, imageLab, sampleDensity);
         }
+        else if (SplinePtr spline = std::dynamic_pointer_cast<Spline>(curve))
+        {
+            for (const auto& bezier : spline->GetBezierPatches())
+            {
+                Sample(bezier, image, imageLab, sampleDensity);
+            }
+        }
+
+        emit ProgressChanged(float(i) / (nCurves - 1));
     }
 }
 
-void DiffusionCurveRenderer::ColorSampler::Reset()
+void DiffusionCurveRenderer::ColorSampler::Sample(BezierPtr bezier, cv::Mat& image, cv::Mat& imageLab, const double sampleDensity)
 {
-    // Nothing to do
+    SampleAlongNormal(bezier, 0.0f, ColorPointType::Left, image, imageLab);
+    SampleAlongNormal(bezier, 0.0f, ColorPointType::Right, image, imageLab);
+
+    SampleAlongNormal(bezier, 0.5, ColorPointType::Left, image, imageLab);
+    SampleAlongNormal(bezier, 0.5, ColorPointType::Right, image, imageLab);
+
+    SampleAlongNormal(bezier, 1.0f, ColorPointType::Left, image, imageLab);
+    SampleAlongNormal(bezier, 1.0f, ColorPointType::Right, image, imageLab);
+
+    int nSamples = sampleDensity * bezier->CalculateLength();
+
+    for (int i = 0; i < nSamples - 3; i++)
+    {
+        SampleAlongNormal(bezier, mRandomGenerator.bounded(1.0f), ColorPointType::Left, image, imageLab);
+        SampleAlongNormal(bezier, mRandomGenerator.bounded(1.0f), ColorPointType::Right, image, imageLab);
+    }
 }
 
 void DiffusionCurveRenderer::ColorSampler::SampleAlongNormal(CurvePtr curve, float parameter, ColorPointType type, cv::Mat& image, cv::Mat& imageLab, const double distance)
@@ -73,4 +83,9 @@ void DiffusionCurveRenderer::ColorSampler::SampleAlongNormal(CurvePtr curve, flo
         const auto color4d = QVector4D(int(color->val[2]) / 255.0f, int(color->val[1]) / 255.0f, int(color->val[0]) / 255.0f, 1.0);
         curve->AddColorPoint(type, color4d, parameter);
     }
+}
+
+void DiffusionCurveRenderer::ColorSampler::Reset()
+{
+    // Nothing to do
 }

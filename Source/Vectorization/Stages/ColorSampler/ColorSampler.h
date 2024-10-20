@@ -20,6 +20,7 @@ namespace DiffusionCurveRenderer
         void Reset() override;
 
       private:
+        void Sample(BezierPtr bezier, cv::Mat& image, cv::Mat& imageLab, const double sampleDensity);
         void SampleAlongNormal(CurvePtr curve, float parameter, ColorPointType type, cv::Mat& image, cv::Mat& imageLab, const double distance = 3.0);
 
       private:
