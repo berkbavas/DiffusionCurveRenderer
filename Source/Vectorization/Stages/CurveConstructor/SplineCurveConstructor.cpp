@@ -27,7 +27,7 @@ DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::SplineCurveConstructor:
 
     if (nPoints <= 1)
     {
-        qInfo() << "Number of points in the polyline is less than 1. Number of points is" << nPoints;
+        qInfo() << "Number of points in the polyline is less than or equal to 1. Number of points is" << nPoints;
         return nullptr;
     }
 

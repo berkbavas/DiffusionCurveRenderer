@@ -17,7 +17,6 @@ namespace DiffusionCurveRenderer
 {
     class ContourRenderer;
     class DiffusionRenderer;
-    class CurveSelectionRenderer;
     class BitmapRenderer;
 
     class RendererManager : protected QOpenGLExtraFunctions
@@ -43,7 +42,7 @@ namespace DiffusionCurveRenderer
         void SetUseMultisampleFramebuffer(bool val);
 
         int GetSmoothIterations() const;
-        int GetFramebufferSize() const { return FramebufferSize; };
+        int GetFramebufferSize() const { return mFramebufferSize; };
 
         CurveQueryInfo Query(const QPoint& queryPoint);
 
@@ -53,7 +52,7 @@ namespace DiffusionCurveRenderer
         CurveSelectionRenderer* mCurveSelectionRenderer;
         BitmapRenderer* mBitmapRenderer;
 
-        int FramebufferSize{ DEFAULT_FRAMEBUFFER_SIZE };
+        int mFramebufferSize{ DEFAULT_FRAMEBUFFER_SIZE };
 
         std::unique_ptr<QOpenGLFramebufferObject> mSaveFramebuffer{ nullptr };
 

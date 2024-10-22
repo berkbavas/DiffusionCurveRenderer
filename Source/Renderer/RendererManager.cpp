@@ -86,7 +86,7 @@ void DiffusionCurveRenderer::RendererManager::Save(const QString& path, RenderMo
 
 void DiffusionCurveRenderer::RendererManager::SetFramebufferSize(int size)
 {
-    FramebufferSize = size;
+    mFramebufferSize = size;
     mDiffusionRenderer->SetFramebufferSize(size);
 }
 
