@@ -11,27 +11,31 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INCLUDE_DIR     Libs/qtimgui/include
-                    Libs/Eigen/include
-                    Libs/opencv-4.6.0/include)
+set(INCLUDE_DIR
+    Libs/qtimgui/include
+    Libs/Eigen/include
+    Libs/opencv-4.6.0/include
+)
 
-set(LIBS_DIR        Libs/qtimgui/lib
-                    Libs/opencv-4.6.0/lib)
+set(LIBS_DIR
+    Libs/qtimgui/lib
+    Libs/opencv-4.6.0/lib
+)
 
-set(LIBS    debug   debug/imgui  
-            debug   debug/qt_imgui_widgets                
-            optimized release/imgui
-            optimized release/qt_imgui_widgets
-            optimized opencv_core460 
-            optimized opencv_imgproc460
-            optimized opencv_highgui460
-            optimized opencv_imgcodecs460)
+set(LIBS
+    debug debug/imgui  
+    debug debug/qt_imgui_widgets                
+    optimized release/imgui
+    optimized release/qt_imgui_widgets
+    optimized opencv_core460 
+    optimized opencv_imgproc460
+    optimized opencv_highgui460
+    optimized opencv_imgcodecs460
+)
 
 find_package(Qt6 COMPONENTS Core Widgets OpenGL Gui Concurrent Xml REQUIRED)
 
-add_compile_options(/bigobj)
-
-file(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h *.qrc)
+file(GLOB_RECURSE SOURCES Source/*.cpp DiffusionCurveRenderer.qrc)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Source" ${INCLUDE_DIR})
 
@@ -45,16 +49,19 @@ add_custom_command(TARGET DiffusionCurveRenderer
     POST_BUILD COMMAND ${CMAKE_COMMAND}
     -E copy_directory
     "${CMAKE_SOURCE_DIR}/Resources/"
-    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>/Resources/")
+    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>/Resources/"
+)
 
 add_custom_command(TARGET DiffusionCurveRenderer
     POST_BUILD COMMAND ${CMAKE_COMMAND} 
     -E copy_directory 
     "${CMAKE_SOURCE_DIR}/Libs/opencv-4.6.0/bin/" 
-    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>")
+    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>"
+)
 
 add_custom_command(TARGET DiffusionCurveRenderer
     POST_BUILD COMMAND
     Qt6::windeployqt 
     --dir "$<TARGET_FILE_DIR:DiffusionCurveRenderer>" 
-    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>/$<TARGET_FILE_NAME:DiffusionCurveRenderer>")
+    "$<TARGET_FILE_DIR:DiffusionCurveRenderer>/$<TARGET_FILE_NAME:DiffusionCurveRenderer>"
+)
