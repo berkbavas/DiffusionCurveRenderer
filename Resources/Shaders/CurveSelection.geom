@@ -28,7 +28,7 @@ float factorial(int n)
 
     for (int i = 2; i <= n; ++i)
     {
-        result *= i;
+        result *= float(i);
     }
 
     return result;
