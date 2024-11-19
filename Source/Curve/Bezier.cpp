@@ -287,7 +287,7 @@ float DiffusionCurveRenderer::Bezier::Factorial(int n) const
 
     for (int i = 1; i <= n; ++i)
     {
-        result *= i;
+        result *= float(i);
     }
 
     return result;
