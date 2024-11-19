@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QObject>
-#include <Vector>
+#include <QVector>
 #include <memory>
 
 namespace DiffusionCurveRenderer
