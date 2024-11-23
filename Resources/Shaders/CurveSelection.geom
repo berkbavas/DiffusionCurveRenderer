@@ -3,7 +3,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-in float gs_Point[];
+in float gsPoint[];
 
 uniform mat4 projection;
 uniform vec2 controlPoints[32];
@@ -80,7 +80,7 @@ vec2 normalAt(float t)
 
 void main()
 {
-    float t0 = gs_Point[0];
+    float t0 = gsPoint[0];
     float t1 = t0 + delta;
 
     vec2 v0 = valueAt(t0);

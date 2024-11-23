@@ -19,14 +19,16 @@ uniform vec4 rightColors[32];
 uniform float rightColorPositions[32];
 uniform int rightColorsCount;
 
-in float gs_Point[];
+in float gsPoint[];
 
-out vec4 fs_Color;
+out vec4 fsColor;
 
 float customPow(float x, float y)
 {
     if (x == 0 && y == 0)
+    {
         return 1;
+    }
 
     return pow(x, y);
 }
@@ -36,7 +38,9 @@ float factorial(int n)
     float result = 1;
 
     for (int i = 2; i <= n; ++i)
+    {
         result *= float(i);
+    }
 
     return result;
 }
@@ -88,7 +92,9 @@ vec2 normalAt(float t)
 vec4 leftColorAt(float t)
 {
     if (leftColorsCount == 0)
+    {
         return vec4(0);
+    }
 
     for (int i = 1; i < leftColorsCount; i++)
     {
@@ -96,14 +102,20 @@ vec4 leftColorAt(float t)
         float t1 = leftColorPositions[i];
 
         if (t0 <= t && t <= t1)
+        {
             return mix(leftColors[i - 1], leftColors[i], (t - t0) / (t1 - t0));
+        }
     }
 
     if (t < leftColorPositions[0])
+    {
         return leftColors[0];
+    }
 
     if (leftColorPositions[leftColorsCount - 1] < t)
+    {
         return leftColors[leftColorsCount - 1];
+    }
 
     return vec4(0);
 }
@@ -111,7 +123,9 @@ vec4 leftColorAt(float t)
 vec4 rightColorAt(float t)
 {
     if (rightColorsCount == 0)
+    {
         return vec4(0);
+    }
 
     for (int i = 1; i < rightColorsCount; i++)
     {
@@ -119,21 +133,27 @@ vec4 rightColorAt(float t)
         float t1 = rightColorPositions[i];
 
         if (t0 <= t && t <= t1)
+        {
             return mix(rightColors[i - 1], rightColors[i], (t - t0) / (t1 - t0));
+        }
     }
 
     if (t < rightColorPositions[0])
+    {
         return rightColors[0];
+    }
 
     if (rightColorPositions[rightColorsCount - 1] < t)
+    {
         return rightColors[rightColorsCount - 1];
+    }
 
     return vec4(0);
 }
 
 void main()
 {
-    float t0 = gs_Point[0];
+    float t0 = gsPoint[0];
     float t1 = t0 + delta;
 
     vec2 v0 = valueAt(t0);
@@ -154,19 +174,19 @@ void main()
     // Left side
     {
         gl_Position = projection * vec4(v0 - 0.5f * gap * n0, 0, 1);
-        fs_Color = l0;
+        fsColor = l0;
         EmitVertex();
 
         gl_Position = projection * vec4(v0 - 0.5f * gap * n0 - 1.0f * width * n0, 0, 1);
-        fs_Color = l0;
+        fsColor = l0;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 - 0.5f * gap * n1, 0, 1);
-        fs_Color = l1;
+        fsColor = l1;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 - 0.5f * gap * n1 - 1.0f * width * n1, 0, 1);
-        fs_Color = l1;
+        fsColor = l1;
         EmitVertex();
 
         EndPrimitive();
@@ -175,19 +195,19 @@ void main()
     // Right side
     {
         gl_Position = projection * vec4(v0 + 0.5f * gap * n0, 0, 1);
-        fs_Color = r0;
+        fsColor = r0;
         EmitVertex();
 
         gl_Position = projection * vec4(v0 + 0.5f * gap * n0 + 1.0f * width * n0, 0, 1);
-        fs_Color = r0;
+        fsColor = r0;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 + 0.5f * gap * n1, 0, 1);
-        fs_Color = r1;
+        fsColor = r1;
         EmitVertex();
 
         gl_Position = projection * vec4(v1 + 0.5f * gap * n1 + 1.0f * width * n1, 0, 1);
-        fs_Color = r1;
+        fsColor = r1;
         EmitVertex();
 
         EndPrimitive();

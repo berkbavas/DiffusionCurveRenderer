@@ -3,7 +3,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-in float gs_Point[];
+in float gsPoint[];
 
 uniform mat4 projection;
 uniform vec4 color;
@@ -12,7 +12,7 @@ uniform float thickness;
 uniform float delta;
 uniform int numberOfControlPoints;
 
-out vec4 fs_Color;
+out vec4 fsColor;
 
 float customPow(float x, float y)
 {
@@ -82,7 +82,7 @@ vec2 normalAt(float t)
 
 void main()
 {
-    float t0 = gs_Point[0];
+    float t0 = gsPoint[0];
     float t1 = t0 + delta;
 
     vec2 v0 = valueAt(t0);
@@ -94,19 +94,19 @@ void main()
     float width = thickness;
 
     gl_Position = projection * vec4(v0 + 0.5 * width * n0, 0, 1);
-    fs_Color = color;
+    fsColor = color;
     EmitVertex();
 
     gl_Position = projection * vec4(v0 - 0.5 * width * n0, 0, 1);
-    fs_Color = color;
+    fsColor = color;
     EmitVertex();
 
     gl_Position = projection * vec4(v1 + 0.5 * width * n1, 0, 1);
-    fs_Color = color;
+    fsColor = color;
     EmitVertex();
 
     gl_Position = projection * vec4(v1 - 0.5 * width * n1, 0, 1);
-    fs_Color = color;
+    fsColor = color;
     EmitVertex();
 
     EndPrimitive();

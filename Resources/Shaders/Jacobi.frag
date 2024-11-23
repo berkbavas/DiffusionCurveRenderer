@@ -1,6 +1,6 @@
 #version 450 core
 
-in vec2 fs_TextureCoords;
+in vec2 fsTextureCoords;
 
 uniform sampler2D colorConstrainedTexture;
 uniform sampler2D colorTargetTexture;
@@ -16,17 +16,17 @@ void main()
     // w  c e
     // sw s se
 
-    vec2 nw = vec2(fs_TextureCoords.s - uStep, fs_TextureCoords.t + vStep);
-    vec2 n = vec2(fs_TextureCoords.s, fs_TextureCoords.t + vStep);
-    vec2 ne = vec2(fs_TextureCoords.s + uStep, fs_TextureCoords.t + vStep);
+    vec2 nw = vec2(fsTextureCoords.s - uStep, fsTextureCoords.t + vStep);
+    vec2 n = vec2(fsTextureCoords.s, fsTextureCoords.t + vStep);
+    vec2 ne = vec2(fsTextureCoords.s + uStep, fsTextureCoords.t + vStep);
 
-    vec2 w = vec2(fs_TextureCoords.s - uStep, fs_TextureCoords.t);
-    vec2 c = vec2(fs_TextureCoords.s, fs_TextureCoords.t);
-    vec2 e = vec2(fs_TextureCoords.s + uStep, fs_TextureCoords.t);
+    vec2 w = vec2(fsTextureCoords.s - uStep, fsTextureCoords.t);
+    vec2 c = vec2(fsTextureCoords.s, fsTextureCoords.t);
+    vec2 e = vec2(fsTextureCoords.s + uStep, fsTextureCoords.t);
 
-    vec2 sw = vec2(fs_TextureCoords.s - uStep, fs_TextureCoords.t - vStep);
-    vec2 s = vec2(fs_TextureCoords.s, fs_TextureCoords.t - vStep);
-    vec2 se = vec2(fs_TextureCoords.s + uStep, fs_TextureCoords.t - vStep);
+    vec2 sw = vec2(fsTextureCoords.s - uStep, fsTextureCoords.t - vStep);
+    vec2 s = vec2(fsTextureCoords.s, fsTextureCoords.t - vStep);
+    vec2 se = vec2(fsTextureCoords.s + uStep, fsTextureCoords.t - vStep);
 
     vec2 vectors[9];
     vectors[0] = nw;
@@ -51,7 +51,7 @@ void main()
     weights[8] = 1;
 
     // Colors
-    vec4 color = texture(colorConstrainedTexture, fs_TextureCoords);
+    vec4 color = texture(colorConstrainedTexture, fsTextureCoords);
 
     if (color.a > 0.1f)
     {
@@ -62,7 +62,10 @@ void main()
         vec4 colors[9];
 
         for (int i = 0; i < 9; i++)
+        {
             colors[i] = texture(colorTargetTexture, vectors[i]);
+        }
+
 
         float totalWeight = 0;
         vec4 color = vec4(0, 0, 0, 0);
@@ -77,8 +80,13 @@ void main()
         }
 
         if (totalWeight > 0)
+        {
             outColor = color / totalWeight;
+        }
         else
+        {
             outColor = vec4(1, 1, 1, 1);
+        }
+
     }
 }

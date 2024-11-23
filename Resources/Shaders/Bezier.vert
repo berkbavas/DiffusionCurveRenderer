@@ -2,9 +2,9 @@
 
 layout(location = 0) in float point;
 
-out float gs_Point;
+out float gsPoint;
 
 void main()
 {
-    gs_Point = point;
+    gsPoint = point;
 }

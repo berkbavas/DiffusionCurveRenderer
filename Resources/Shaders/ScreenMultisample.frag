@@ -1,11 +1,11 @@
 #version 450 core
 
-in vec2 fs_TextureCoords;
+in vec2 fsTextureCoords;
 
 uniform int numberOfSamples;
 uniform sampler2DMS multisampleTexture;
 
-out vec4 out_Color;
+out vec4 outColor;
 
 vec4 multisample(sampler2DMS sampler, ivec2 coord)
 {
@@ -31,6 +31,6 @@ vec4 multisample(sampler2DMS sampler, ivec2 coord)
 void main()
 {
     ivec2 texSize = textureSize(multisampleTexture);
-    ivec2 texCoord = ivec2(fs_TextureCoords * texSize);
-    out_Color = multisample(multisampleTexture, texCoord);
+    ivec2 texCoord = ivec2(fsTextureCoords * texSize);
+    outColor = multisample(multisampleTexture, texCoord);
 }

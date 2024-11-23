@@ -1,20 +1,20 @@
 #version 450 core
 
-in vec4 fs_Color;
+in vec4 fsColor;
 
 uniform int useGlobalColor;
 uniform vec4 globalColor;
 
-out vec4 out_Color;
+out vec4 outColor;
 
 void main()
 {
     if (useGlobalColor == 1)
     {
-        out_Color = globalColor;
+        outColor = globalColor;
     }
     else
     {
-        out_Color = fs_Color;
+        outColor = fsColor;
     }
 }
