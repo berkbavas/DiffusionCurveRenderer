@@ -29,6 +29,6 @@ I use `ImGui` for GUI; `OpenCV` for edge detection and `Eigen` for vectorization
 
 ## Videos
 
-https://github.com/user-attachments/assets/fdea8b57-3c40-4349-90a8-2834094a70aa
+https://github.com/user-attachments/assets/a9733a6d-730e-43b0-b889-2ae0fbe6b1fd
 
 https://github.com/user-attachments/assets/b4e9dbfe-705d-495c-bcb8-69484ec16fe6
