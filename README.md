@@ -43,11 +43,11 @@ All dependencies are included in the `Libs` folder:
 8. Open `DiffusionCurveRenderer.sln` in Visual Studio 2022.
 9. Build and run the project in **Release** configuration.
 
-
 ## Demo Videos
 
-- [Video 1](https://github.com/user-attachments/assets/a9733a6d-730e-43b0-b889-2ae0fbe6b1fd)
-- [Video 2](https://github.com/user-attachments/assets/b4e9dbfe-705d-495c-bcb8-69484ec16fe6)
+[Video 1](https://github.com/user-attachments/assets/a9733a6d-730e-43b0-b889-2ae0fbe6b1fd)
+
+[Video 2](https://github.com/user-attachments/assets/b4e9dbfe-705d-495c-bcb8-69484ec16fe6)
 
 ## License
 
