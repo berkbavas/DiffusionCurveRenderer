@@ -28,20 +28,20 @@ All dependencies are included in the `Libs` folder:
 3. Install **Qt 6.7.3 MSVC2022 64bit**.
 4. Set the environment variable `Qt6_DIR` to `C:\Qt\6.7.3\msvc2022_64`.
 5. Clone the repository:
-	```
-	git clone https://github.com/berkbavas/DiffusionCurveRenderer.git
-	```
+        ```cmd
+        git clone https://github.com/berkbavas/DiffusionCurveRenderer.git
+        ```
 6. Create and enter the build directory:
-	```
-	mkdir Build
-	cd Build
-	```
+        ```cmd
+        mkdir Build
+        cd Build
+        ```
 7. Run CMake:
-	```
-	cmake ..
-	```
+        ```cmd
+        cmake ..
+        ```
 8. Open `DiffusionCurveRenderer.sln` in Visual Studio 2022.
-9. Build and run the project in **Release** configuration.
+9. Build and run the project.
 
 ## Demo Videos
 

@@ -11,22 +11,26 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INCLUDE_DIR
-    Libs/qtimgui/include
-    Libs/Eigen/include
-    Libs/opencv-4.6.0/include
-)
+set(LIBS_DIR        "${CMAKE_CURRENT_SOURCE_DIR}/Libs")
+set(QT_IMGUI_DIR    "${LIBS_DIR}/qtimgui")
+set(EIGEN_DIR       "${LIBS_DIR}/Eigen")
+set(OPENCV_DIR      "${LIBS_DIR}/opencv-4.6.0")
 
-set(LIBS_DIR
-    Libs/qtimgui/lib
-    Libs/opencv-4.6.0/lib
+set(INCLUDE_DIR     
+    "${QT_IMGUI_DIR}/include"
+    "${EIGEN_DIR}/include" 
+    "${OPENCV_DIR}/include"
+)
+set(LIBS_DIR 
+    "${QT_IMGUI_DIR}/lib"
+    "${OPENCV_DIR}/lib"
 )
 
 set(LIBS
-    debug debug/imgui  
-    debug debug/qt_imgui_widgets                
-    optimized release/imgui
-    optimized release/qt_imgui_widgets
+    debug imguid
+    debug qt_imgui_widgetsd              
+    optimized imgui
+    optimized qt_imgui_widgets
     optimized opencv_core460 
     optimized opencv_imgproc460
     optimized opencv_highgui460
@@ -37,11 +41,11 @@ find_package(Qt6 COMPONENTS Core Widgets OpenGL Gui Concurrent Xml REQUIRED)
 
 file(GLOB_RECURSE SOURCES Source/*.cpp DiffusionCurveRenderer.qrc)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Source" ${INCLUDE_DIR})
-
-link_directories(${LIBS_DIR})
-
 add_executable(DiffusionCurveRenderer ${SOURCES})
+
+target_include_directories(DiffusionCurveRenderer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Source" ${INCLUDE_DIR})
+
+target_link_directories(DiffusionCurveRenderer PRIVATE ${LIBS_DIR})
 
 target_link_libraries(DiffusionCurveRenderer Qt6::Core Qt6::Widgets Qt6::OpenGL Qt6::Concurrent Qt6::Xml ${LIBS})
 
