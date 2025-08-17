@@ -1,8 +1,9 @@
 # Diffusion Curve Renderer
 
-A C++ project for reconstructing images using Bézier curves and color diffusion constrained by those curves.
+C++ project for reconstructing images using Bézier curves and color diffusion constrained by those curves.
 
-Inspired by the work of [Orzan et al.](https://hal.archives-ouvertes.fr/inria-00274768/). Vectorization algorithms are adapted from [this repository](https://github.com/zhuethanca/DiffusionCurves).
+Inspired by the work of [Orzan et al.](https://hal.archives-ouvertes.fr/inria-00274768/).
+Vectorization algorithms are adapted from [this repository](https://github.com/zhuethanca/DiffusionCurves).
 
 ## Features
 
