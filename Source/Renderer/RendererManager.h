@@ -10,6 +10,7 @@
 
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLFramebufferObject>
+#include <QVector4D>
 #include <map>
 #include <memory>
 
@@ -40,9 +41,11 @@ namespace DiffusionCurveRenderer
         void SetFramebufferSize(int size);
         void SetSmoothIterations(int smoothIterations);
         void SetUseMultisampleFramebuffer(bool val);
+        void SetBackgroundColor(const QVector4D& color) { mBackgroundColor = color; }
 
         int GetSmoothIterations() const;
         int GetFramebufferSize() const { return mFramebufferSize; };
+        const QVector4D& GetBackgroundColor() const { return mBackgroundColor; }
 
         CurveQueryInfo Query(const QPoint& queryPoint);
 
@@ -53,6 +56,7 @@ namespace DiffusionCurveRenderer
         BitmapRenderer* mBitmapRenderer;
 
         int mFramebufferSize{ DEFAULT_FRAMEBUFFER_SIZE };
+        QVector4D mBackgroundColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
         std::unique_ptr<QOpenGLFramebufferObject> mSaveFramebuffer{ nullptr };
 

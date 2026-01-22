@@ -17,6 +17,7 @@
 
 #include <QtImGui.h>
 #include <imgui.h>
+#include <limits>
 
 DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     : QObject(parent)
@@ -42,6 +43,7 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
 
     mImGuiWindow->SetCurveContainer(mCurveContainer);
     mImGuiWindow->SetRendererManager(mRendererManager);
+    mImGuiWindow->SetCamera(mCamera);
 
     mVectorizationManager = new VectorizationManager;
     mVectorizationManagerThread = new QThread;
@@ -64,6 +66,13 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
     connect(mEventHandler, &EventHandler::ControlPointAroundChanged, mOverlayPainter, &OverlayPainter::SetControlPointAround);
     connect(mEventHandler, &EventHandler::ColorPointAroundChanged, mOverlayPainter, &OverlayPainter::SetColorPointAround);
     connect(mEventHandler, &EventHandler::SelectedColorPointChanged, mOverlayPainter, &OverlayPainter::SetSelectedColorPoint);
+    
+    // Connect keyboard shortcut signals from EventHandler
+    connect(mEventHandler, &EventHandler::DuplicateCurveRequested, this, [this]() {
+        DuplicateCurve(mSelectedCurve);
+    });
+    connect(mEventHandler, &EventHandler::ZoomToFitRequested, this, &Controller::OnZoomToFit);
+    connect(mEventHandler, &EventHandler::ResetViewRequested, this, &Controller::OnResetView);
 
     connect(mImGuiWindow, &ImGuiWindow::SelectedCurveChanged, this, &Controller::OnSelectedCurveChanged);
     connect(mImGuiWindow, &ImGuiWindow::SelectedControlPointChanged, mOverlayPainter, &OverlayPainter::SetSelectedControlPoint);
@@ -92,6 +101,13 @@ DiffusionCurveRenderer::Controller::Controller(QObject* parent)
             {
                 mRendererManager->Save(path, mRenderModes); //
             });
+    
+    // New signal connections for enhanced features
+    connect(mImGuiWindow, &ImGuiWindow::DuplicateCurve, this, &Controller::DuplicateCurve);
+    connect(mImGuiWindow, &ImGuiWindow::BackgroundColorChanged, this, &Controller::OnBackgroundColorChanged);
+    connect(mImGuiWindow, &ImGuiWindow::ShowGridChanged, this, &Controller::OnShowGridChanged);
+    connect(mImGuiWindow, &ImGuiWindow::ResetView, this, &Controller::OnResetView);
+    connect(mImGuiWindow, &ImGuiWindow::ZoomToFit, this, &Controller::OnZoomToFit);
 
     connect(mImGuiWindow, &ImGuiWindow::ExportAsJson, this, [=](const QString& path)
             {
@@ -383,4 +399,91 @@ void DiffusionCurveRenderer::Controller::SetWorkMode(WorkMode workMode)
 {
     mWorkMode = workMode;
     mImGuiWindow->SetWorkMode(mWorkMode);
+}
+
+void DiffusionCurveRenderer::Controller::DuplicateCurve(CurvePtr curve)
+{
+    if (!curve)
+        return;
+    
+    // Clone the curve with an offset
+    CurvePtr clonedCurve = curve->Clone(QVector2D(30, 30));
+    
+    if (clonedCurve)
+    {
+        mCurveContainer->AddCurve(clonedCurve);
+        OnSelectedCurveChanged(clonedCurve);
+        qDebug() << "Controller::DuplicateCurve: Curve duplicated successfully";
+    }
+}
+
+void DiffusionCurveRenderer::Controller::OnBackgroundColorChanged(const QVector4D& color)
+{
+    mBackgroundColor = color;
+    mRendererManager->SetBackgroundColor(color);
+}
+
+void DiffusionCurveRenderer::Controller::OnShowGridChanged(bool show)
+{
+    mShowGrid = show;
+    mOverlayPainter->SetShowGrid(show);
+}
+
+void DiffusionCurveRenderer::Controller::OnResetView()
+{
+    mCamera->Reset();
+}
+
+void DiffusionCurveRenderer::Controller::OnZoomToFit()
+{
+    // Calculate bounding box of all curves and fit the view
+    if (mCurveContainer->GetTotalNumberOfCurves() == 0)
+    {
+        mCamera->Reset();
+        return;
+    }
+    
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::lowest();
+    float maxY = std::numeric_limits<float>::lowest();
+    
+    for (int i = 0; i < mCurveContainer->GetTotalNumberOfCurves(); ++i)
+    {
+        auto curve = mCurveContainer->GetCurve(i);
+        for (int j = 0; j < curve->GetNumberOfControlPoints(); ++j)
+        {
+            QVector2D pos = curve->GetControlPointPosition(j);
+            minX = std::min(minX, pos.x());
+            minY = std::min(minY, pos.y());
+            maxX = std::max(maxX, pos.x());
+            maxY = std::max(maxY, pos.y());
+        }
+    }
+    
+    // Add padding
+    float padding = 50.0f;
+    minX -= padding;
+    minY -= padding;
+    maxX += padding;
+    maxY += padding;
+    
+    // Set camera to fit the bounding box
+    float width = maxX - minX;
+    float height = maxY - minY;
+    float aspectRatio = mWidth / mHeight;
+    
+    float zoom = 1.0f;
+    if (width / height > aspectRatio)
+    {
+        zoom = mWidth / width;
+    }
+    else
+    {
+        zoom = mHeight / height;
+    }
+    
+    mCamera->SetZoom(zoom);
+    mCamera->SetLeft(minX);
+    mCamera->SetTop(minY);
 }

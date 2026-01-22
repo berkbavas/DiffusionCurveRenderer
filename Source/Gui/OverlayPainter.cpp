@@ -20,6 +20,12 @@ DiffusionCurveRenderer::OverlayPainter::OverlayPainter(QObject* parent)
 
 void DiffusionCurveRenderer::OverlayPainter::Render()
 {
+    // Draw grid first if enabled
+    if (mShowGrid)
+    {
+        DrawGrid();
+    }
+    
     if (mSelectedCurve == nullptr)
         return;
 
@@ -198,4 +204,67 @@ QPointF DiffusionCurveRenderer::OverlayPainter::GetColorPointHandlePosition(Curv
     offset = mCamera->CameraDistanceToWorldDistance(offset);
     QVector2D worldPosition = curve->PositionAt(position) + useOffset * offset * curve->NormalAt(position);
     return WorldToCamera(worldPosition);
+}
+
+void DiffusionCurveRenderer::OverlayPainter::DrawGrid()
+{
+    QPainter painter(mDevice);
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.setPen(mGridPen);
+    
+    int deviceWidth = mDevice->width();
+    int deviceHeight = mDevice->height();
+    
+    // Calculate world coordinates of viewport corners
+    QVector2D topLeft = mCamera->CameraToWorld(QVector2D(0, 0));
+    QVector2D bottomRight = mCamera->CameraToWorld(QVector2D(deviceWidth, deviceHeight));
+    
+    // Adjust grid spacing based on zoom level
+    float adjustedSpacing = mGridSpacing;
+    float zoom = mCamera->GetZoom();
+    
+    // Scale grid to maintain reasonable density at different zoom levels
+    while (adjustedSpacing * zoom < 20) adjustedSpacing *= 2;
+    while (adjustedSpacing * zoom > 100) adjustedSpacing /= 2;
+    
+    // Calculate starting points (snap to grid)
+    float startX = std::floor(topLeft.x() / adjustedSpacing) * adjustedSpacing;
+    float startY = std::floor(topLeft.y() / adjustedSpacing) * adjustedSpacing;
+    
+    // Draw vertical lines
+    for (float x = startX; x <= bottomRight.x(); x += adjustedSpacing)
+    {
+        QPointF p0 = mCamera->WorldToCamera(QPointF(x, topLeft.y()));
+        QPointF p1 = mCamera->WorldToCamera(QPointF(x, bottomRight.y()));
+        painter.drawLine(p0, p1);
+    }
+    
+    // Draw horizontal lines
+    for (float y = startY; y <= bottomRight.y(); y += adjustedSpacing)
+    {
+        QPointF p0 = mCamera->WorldToCamera(QPointF(topLeft.x(), y));
+        QPointF p1 = mCamera->WorldToCamera(QPointF(bottomRight.x(), y));
+        painter.drawLine(p0, p1);
+    }
+    
+    // Draw origin crosshair (thicker lines at origin)
+    QPen originPen(QColor(150, 150, 150, 120));
+    originPen.setWidth(2);
+    painter.setPen(originPen);
+    
+    // Vertical line at x=0
+    if (topLeft.x() <= 0 && bottomRight.x() >= 0)
+    {
+        QPointF p0 = mCamera->WorldToCamera(QPointF(0, topLeft.y()));
+        QPointF p1 = mCamera->WorldToCamera(QPointF(0, bottomRight.y()));
+        painter.drawLine(p0, p1);
+    }
+    
+    // Horizontal line at y=0
+    if (topLeft.y() <= 0 && bottomRight.y() >= 0)
+    {
+        QPointF p0 = mCamera->WorldToCamera(QPointF(topLeft.x(), 0));
+        QPointF p1 = mCamera->WorldToCamera(QPointF(bottomRight.x(), 0));
+        painter.drawLine(p0, p1);
+    }
 }

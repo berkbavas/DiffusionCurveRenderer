@@ -1,6 +1,7 @@
 #include "ImGuiWindow.h"
 
 #include "Core/CurveContainer.h"
+#include "Core/OrthographicCamera.h"
 #include "Renderer/RendererManager.h"
 #include "Util/Chronometer.h"
 #include "Util/Logger.h"
@@ -13,6 +14,7 @@
 DiffusionCurveRenderer::ImGuiWindow::ImGuiWindow(QObject* parent)
     : QObject(parent)
 {
+
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::Draw()
@@ -36,6 +38,10 @@ void DiffusionCurveRenderer::ImGuiWindow::Draw()
         DrawCurveEditingSettings();
     }
     ImGui::End();
+    
+    // Draw popups
+    DrawAboutPopup();
+    DrawShortcutsPopup();
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::DrawWorkModes()
@@ -133,6 +139,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveEditingSettings()
 {
     DrawHintTexts();
     DrawRenderMode();
+    DrawViewSettings();
     DrawCurveHeader();
     DrawRenderSettings();
     DrawStats();
@@ -144,26 +151,28 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Open an image for vectorization"))
+            if (ImGui::MenuItem("Open an image for vectorization", "Ctrl+O"))
             {
                 QString path = QFileDialog::getOpenFileName(nullptr, "Select an image", "", "*.png *.jpg *.jpeg *.bmp");
 
                 if (path.isNull() == false)
                 {
                     qDebug() << "ImGuiWindow::DrawMenuBar(Select an image): Path is" << path;
+                    AddRecentFile(path);
                     emit LoadImage(path);
                 }
             }
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Import XML"))
+            if (ImGui::MenuItem("Import XML", "Ctrl+I"))
             {
                 QString path = QFileDialog::getOpenFileName(nullptr, "Select XML File", "", "*.xml");
 
                 if (path.isNull() == false)
                 {
                     qDebug() << "ImGuiWindow::DrawMenuBar(Import XML): Path is" << path;
+                    AddRecentFile(path);
                     emit ImportXml(path);
                 }
             }
@@ -175,13 +184,45 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
                 if (path.isNull() == false)
                 {
                     qDebug() << "ImGuiWindow::DrawMenuBar(Import JSON): Path is" << path;
+                    AddRecentFile(path);
                     emit ImportJson(path);
                 }
             }
 
             ImGui::Separator();
+            
+            // Recent Files submenu
+            if (ImGui::BeginMenu("Recent Files", !mRecentFiles.isEmpty()))
+            {
+                for (const QString& recentFile : mRecentFiles)
+                {
+                    if (ImGui::MenuItem(recentFile.toStdString().c_str()))
+                    {
+                        if (recentFile.endsWith(".xml", Qt::CaseInsensitive))
+                        {
+                            emit ImportXml(recentFile);
+                        }
+                        else if (recentFile.endsWith(".json", Qt::CaseInsensitive))
+                        {
+                            emit ImportJson(recentFile);
+                        }
+                        else
+                        {
+                            emit LoadImage(recentFile);
+                        }
+                    }
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Clear Recent Files"))
+                {
+                    mRecentFiles.clear();
+                }
+                ImGui::EndMenu();
+            }
 
-            if (ImGui::MenuItem("Save as PNG"))
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Save as PNG", "Ctrl+S"))
             {
                 QString path = QFileDialog::getSaveFileName(nullptr, "PNG File", "", "*.png");
 
@@ -192,7 +233,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
                 }
             }
 
-            if (ImGui::MenuItem("Export as JSON"))
+            if (ImGui::MenuItem("Export as JSON", "Ctrl+E"))
             {
                 QString path = QFileDialog::getSaveFileName(nullptr, "JSON File", "", "*.json");
 
@@ -203,6 +244,107 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
                 }
             }
 
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Edit"))
+        {
+            if (ImGui::MenuItem("Duplicate Curve", "Ctrl+D", false, mSelectedCurve != nullptr))
+            {
+                emit DuplicateCurve(mSelectedCurve);
+            }
+            
+            ImGui::Separator();
+            
+            if (ImGui::MenuItem("Clear Canvas", "Ctrl+Shift+C"))
+            {
+                emit ClearCanvas();
+            }
+            
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Reset View", "Home"))
+            {
+                emit ResetView();
+            }
+            
+            if (ImGui::MenuItem("Zoom to Fit", "F"))
+            {
+                emit ZoomToFit();
+            }
+            
+            ImGui::Separator();
+            
+            if (ImGui::MenuItem("Show Grid", nullptr, mShowGrid))
+            {
+                mShowGrid = !mShowGrid;
+                emit ShowGridChanged(mShowGrid);
+            }
+            
+            if (mShowGrid)
+            {
+                ImGui::Indent();
+                if (ImGui::SliderFloat("Grid Spacing", &mGridSpacing, 10.0f, 200.0f))
+                {
+                    // Grid spacing updated
+                }
+                ImGui::Unindent();
+            }
+            
+            ImGui::Separator();
+            
+            // Zoom display
+            if (mCamera)
+            {
+                float zoomPercent = mCamera->GetZoom() * 100.0f;
+                ImGui::Text("Zoom: %.0f%%", zoomPercent);
+            }
+            
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Theme"))
+        {
+            if (ImGui::MenuItem("Dark", nullptr, mCurrentTheme == UITheme::Dark))
+            {
+                ApplyTheme(UITheme::Dark);
+            }
+            if (ImGui::MenuItem("Light", nullptr, mCurrentTheme == UITheme::Light))
+            {
+                ApplyTheme(UITheme::Light);
+            }
+            if (ImGui::MenuItem("Classic", nullptr, mCurrentTheme == UITheme::Classic))
+            {
+                ApplyTheme(UITheme::Classic);
+            }
+            
+            ImGui::Separator();
+            
+            if (ImGui::ColorEdit4("Background Color", &mBackgroundColor[0]))
+            {
+                emit BackgroundColorChanged(mBackgroundColor);
+            }
+            
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Help"))
+        {
+            if (ImGui::MenuItem("Keyboard Shortcuts", "F1"))
+            {
+                mShowShortcutsPopup = true;
+            }
+            
+            ImGui::Separator();
+            
+            if (ImGui::MenuItem("About"))
+            {
+                mShowAboutPopup = true;
+            }
+            
             ImGui::EndMenu();
         }
 
@@ -218,6 +360,9 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawHintTexts()
         ImGui::Text("Add Control Point : Right Click");
         ImGui::Text("Add Color Point   : CTRL + Right Click");
         ImGui::Text("Move              : Middle button");
+        ImGui::Text("Delete            : Delete key");
+        ImGui::Text("Duplicate Curve   : CTRL + D");
+        ImGui::Separator();
         if (ImGui::Checkbox("Show Color Point Handles", &mShowColorPointHandles))
         {
             emit ShowColorPointHandlesChanged(mShowColorPointHandles);
@@ -257,11 +402,19 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawCurveHeader()
             }
 
             ImGui::Text("Number of Control Points: %d", mSelectedCurve->GetControlPoints().size());
+            ImGui::Text("Curve Length: %.1f", mSelectedCurve->CalculateLength());
             ImGui::SliderFloat("Thickness", &mSelectedCurve->GetContourThickness_NonConst(), 1, 20);
             ImGui::SliderFloat("Diffusion Width", &mSelectedCurve->GetDiffusionWidth_NonConst(), 0.5f, 4.0f);
             ImGui::SliderFloat("Diffusion Gap", &mSelectedCurve->GetDiffusionGap_NonConst(), 0.5f, 4.0f);
             ImGui::ColorEdit4("Contour Color", &mSelectedCurve->GetContourColor_NonConst()[0]);
 
+            ImGui::Spacing();
+            
+            if (ImGui::Button("Duplicate Curve"))
+            {
+                emit DuplicateCurve(mSelectedCurve);
+            }
+            ImGui::SameLine();
             if (ImGui::Button("Remove Curve"))
             {
                 mCurveContainer->RemoveCurve(mSelectedCurve);
@@ -344,11 +497,34 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawStats()
 {
     if (ImGui::CollapsingHeader("Stats"))
     {
-        for (const auto& ID : ALL_CHORONOMETER_IDs)
-            ImGui::Text(Chronometer::Print(ID).c_str());
-
-        ImGui::Text("# of curves: %zu", mCurveContainer->GetTotalNumberOfCurves());
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        
+        ImGui::Separator();
+        ImGui::Text("Scene Statistics:");
+        ImGui::Text("  Total Curves: %zu", mCurveContainer->GetTotalNumberOfCurves());
+        
+        // Calculate total control points
+        size_t totalControlPoints = 0;
+        size_t totalColorPoints = 0;
+        for (int i = 0; i < mCurveContainer->GetTotalNumberOfCurves(); ++i)
+        {
+            auto curve = mCurveContainer->GetCurve(i);
+            totalControlPoints += curve->GetNumberOfControlPoints();
+        }
+        ImGui::Text("  Total Control Points: %zu", totalControlPoints);
+        
+        if (mCamera)
+        {
+            ImGui::Separator();
+            ImGui::Text("Camera:");
+            ImGui::Text("  Zoom: %.0f%%", mCamera->GetZoom() * 100.0f);
+            ImGui::Text("  Position: (%.1f, %.1f)", mCamera->GetLeft(), mCamera->GetTop());
+        }
+        
+        ImGui::Separator();
+        ImGui::Text("Performance Timings:");
+        for (const auto& ID : ALL_CHORONOMETER_IDs)
+            ImGui::Text("  %s", Chronometer::Print(ID).c_str());
     }
 }
 
@@ -420,4 +596,195 @@ void DiffusionCurveRenderer::ImGuiWindow::SetGaussianStackLayer(int layer)
 
     mGaussianStackLayer = layer;
     emit GaussianStackLayerChanged(mGaussianStackLayer);
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::DrawViewSettings()
+{
+    if (ImGui::CollapsingHeader("View Settings"))
+    {
+        if (ImGui::Checkbox("Show Grid Overlay", &mShowGrid))
+        {
+            emit ShowGridChanged(mShowGrid);
+        }
+        
+        if (mShowGrid)
+        {
+            ImGui::SliderFloat("Grid Spacing", &mGridSpacing, 10.0f, 200.0f);
+        }
+        
+        if (ImGui::ColorEdit4("Background Color", &mBackgroundColor[0]))
+        {
+            emit BackgroundColorChanged(mBackgroundColor);
+        }
+        
+        ImGui::Separator();
+        
+        if (mCamera)
+        {
+            ImGui::Text("Zoom: %.0f%%", mCamera->GetZoom() * 100.0f);
+            
+            if (ImGui::Button("Reset View"))
+            {
+                emit ResetView();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Zoom to Fit"))
+            {
+                emit ZoomToFit();
+            }
+        }
+    }
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::DrawAboutPopup()
+{
+    if (mShowAboutPopup)
+    {
+        ImGui::OpenPopup("About");
+        mShowAboutPopup = false;
+    }
+    
+    if (ImGui::BeginPopupModal("About", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Diffusion Curve Renderer");
+        ImGui::Separator();
+        ImGui::Text("Version 1.1.0");
+        ImGui::Spacing();
+        ImGui::Text("A C++ application for reconstructing images using");
+        ImGui::Text("Bezier curves and color diffusion.");
+        ImGui::Spacing();
+        ImGui::Text("Based on the work of Orzan et al.");
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("Technologies:");
+        ImGui::BulletText("Qt 6 with OpenGL");
+        ImGui::BulletText("ImGui for UI");
+        ImGui::BulletText("OpenCV for image processing");
+        ImGui::BulletText("Eigen for linear algebra");
+        ImGui::Spacing();
+        
+        if (ImGui::Button("Close", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        
+        ImGui::EndPopup();
+    }
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::DrawShortcutsPopup()
+{
+    if (mShowShortcutsPopup)
+    {
+        ImGui::OpenPopup("Keyboard Shortcuts");
+        mShowShortcutsPopup = false;
+    }
+    
+    if (ImGui::BeginPopupModal("Keyboard Shortcuts", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Navigation");
+        ImGui::Separator();
+        ImGui::BulletText("Middle Mouse Button - Pan view");
+        ImGui::BulletText("Mouse Wheel - Zoom in/out");
+        ImGui::BulletText("Home - Reset view");
+        ImGui::BulletText("F - Zoom to fit");
+        ImGui::Spacing();
+        
+        ImGui::Text("Curve Editing");
+        ImGui::Separator();
+        ImGui::BulletText("Left Click - Select curve/point");
+        ImGui::BulletText("Right Click - Add control point");
+        ImGui::BulletText("Ctrl + Right Click - Add color point");
+        ImGui::BulletText("Delete - Remove selected item");
+        ImGui::BulletText("Ctrl + D - Duplicate curve");
+        ImGui::Spacing();
+        
+        ImGui::Text("File Operations");
+        ImGui::Separator();
+        ImGui::BulletText("Ctrl + O - Open image");
+        ImGui::BulletText("Ctrl + I - Import XML");
+        ImGui::BulletText("Ctrl + S - Save as PNG");
+        ImGui::BulletText("Ctrl + E - Export as JSON");
+        ImGui::BulletText("Ctrl + Shift + C - Clear canvas");
+        ImGui::Spacing();
+        
+        if (ImGui::Button("Close", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        
+        ImGui::EndPopup();
+    }
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(UITheme theme)
+{
+    mCurrentTheme = theme;
+    
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    switch (theme)
+    {
+        case UITheme::Dark:
+            ImGui::StyleColorsDark();
+            style.FrameRounding = 4.0f;
+            style.WindowRounding = 6.0f;
+            style.GrabRounding = 4.0f;
+            style.ScrollbarRounding = 6.0f;
+            style.FrameBorderSize = 1.0f;
+            
+            // Customize dark theme colors
+            style.Colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.12f, 1.0f);
+            style.Colors[ImGuiCol_Header] = ImVec4(0.2f, 0.4f, 0.6f, 0.8f);
+            style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.3f, 0.5f, 0.7f, 0.9f);
+            style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.45f, 0.65f, 1.0f);
+            style.Colors[ImGuiCol_Button] = ImVec4(0.2f, 0.4f, 0.6f, 0.8f);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.5f, 0.7f, 1.0f);
+            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.45f, 0.65f, 1.0f);
+            style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.18f, 1.0f);
+            style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.2f, 0.2f, 0.25f, 1.0f);
+            style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.3f, 0.5f, 0.7f, 1.0f);
+            style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.4f, 0.6f, 0.8f, 1.0f);
+            break;
+            
+        case UITheme::Light:
+            ImGui::StyleColorsLight();
+            style.FrameRounding = 4.0f;
+            style.WindowRounding = 6.0f;
+            style.GrabRounding = 4.0f;
+            style.ScrollbarRounding = 6.0f;
+            style.FrameBorderSize = 1.0f;
+            
+            // Customize light theme
+            style.Colors[ImGuiCol_WindowBg] = ImVec4(0.95f, 0.95f, 0.97f, 1.0f);
+            style.Colors[ImGuiCol_Header] = ImVec4(0.6f, 0.7f, 0.85f, 0.8f);
+            style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.7f, 0.8f, 0.9f, 0.9f);
+            style.Colors[ImGuiCol_Button] = ImVec4(0.5f, 0.65f, 0.8f, 0.8f);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.6f, 0.75f, 0.9f, 1.0f);
+            break;
+            
+        case UITheme::Classic:
+            ImGui::StyleColorsClassic();
+            style.FrameRounding = 2.0f;
+            style.WindowRounding = 4.0f;
+            style.GrabRounding = 2.0f;
+            break;
+    }
+    
+    emit ThemeChanged(theme);
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::AddRecentFile(const QString& path)
+{
+    // Remove if already exists
+    mRecentFiles.removeAll(path);
+    
+    // Add to front
+    mRecentFiles.prepend(path);
+    
+    // Keep only max number of recent files
+    while (mRecentFiles.size() > MAX_RECENT_FILES)
+    {
+        mRecentFiles.removeLast();
+    }
 }

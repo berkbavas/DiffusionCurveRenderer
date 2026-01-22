@@ -567,3 +567,34 @@ DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::Bezier::FromJsonObject(
 
     return bezier;
 }
+
+std::shared_ptr<DiffusionCurveRenderer::Curve> DiffusionCurveRenderer::Bezier::Clone(const QVector2D& offset) const
+{
+    auto clone = std::make_shared<Bezier>();
+    
+    // Copy control points with offset
+    for (const auto& controlPoint : mControlPoints)
+    {
+        clone->AddControlPoint(controlPoint->position + offset);
+    }
+    
+    // Copy color points
+    for (const auto& colorPoint : mColorPoints)
+    {
+        clone->AddColorPoint(colorPoint->type, colorPoint->color, colorPoint->position);
+    }
+    
+    // Copy blur points
+    for (const auto& blurPoint : mBlurPoints)
+    {
+        clone->AddBlurPoint(blurPoint->position, blurPoint->strength);
+    }
+    
+    // Copy curve properties
+    clone->SetContourColor(GetContourColor());
+    clone->SetContourThickness(GetContourThickness());
+    clone->SetDiffusionWidth(GetDiffusionWidth());
+    clone->SetDiffusionGap(GetDiffusionGap());
+    
+    return clone;
+}

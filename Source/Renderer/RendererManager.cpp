@@ -41,7 +41,7 @@ void DiffusionCurveRenderer::RendererManager::Clear()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, mCamera->GetWidth(), mCamera->GetHeight());
-    glClearColor(1, 1, 1, 1);
+    glClearColor(mBackgroundColor.x(), mBackgroundColor.y(), mBackgroundColor.z(), mBackgroundColor.w());
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

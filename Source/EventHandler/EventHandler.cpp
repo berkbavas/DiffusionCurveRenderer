@@ -17,6 +17,7 @@ void DiffusionCurveRenderer::EventHandler::OnKeyPressed(QKeyEvent* event)
     qDebug() << "EventHandler::OnKeyPressed" << event;
 
     mPressedKey = Qt::Key(event->key());
+    mModifiers = event->modifiers();
 
     if (mPressedKey == Qt::Key_Delete)
     {
@@ -42,11 +43,30 @@ void DiffusionCurveRenderer::EventHandler::OnKeyPressed(QKeyEvent* event)
             SetSelectedCurve(nullptr);
         }
     }
+    // Ctrl+D: Duplicate curve
+    else if (mPressedKey == Qt::Key_D && (mModifiers & Qt::ControlModifier))
+    {
+        if (mSelectedCurve)
+        {
+            emit DuplicateCurveRequested();
+        }
+    }
+    // F: Zoom to fit
+    else if (mPressedKey == Qt::Key_F && !(mModifiers & Qt::ControlModifier))
+    {
+        emit ZoomToFitRequested();
+    }
+    // Home: Reset view
+    else if (mPressedKey == Qt::Key_Home)
+    {
+        emit ResetViewRequested();
+    }
 }
 
 void DiffusionCurveRenderer::EventHandler::OnKeyReleased(QKeyEvent* event)
 {
     mPressedKey = Qt::Key_No;
+    mModifiers = Qt::NoModifier;
 }
 
 void DiffusionCurveRenderer::EventHandler::OnMousePressed(QMouseEvent* event)

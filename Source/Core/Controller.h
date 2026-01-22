@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QOpenGLExtraFunctions>
 #include <QThread>
+#include <QVector4D>
 #include <opencv2/core/mat.hpp>
 
 namespace DiffusionCurveRenderer
@@ -59,6 +60,11 @@ namespace DiffusionCurveRenderer
         void OnSelectedCurveChanged(CurvePtr selectedCurve);
         void SetWorkMode(WorkMode workMode);
         void ClearCanvas();
+        void DuplicateCurve(CurvePtr curve);
+        void OnBackgroundColorChanged(const QVector4D& color);
+        void OnShowGridChanged(bool show);
+        void OnResetView();
+        void OnZoomToFit();
 
         float mDevicePixelRatio{ 1.0f };
         float mWidth{ INITIAL_WIDTH };
@@ -81,5 +87,10 @@ namespace DiffusionCurveRenderer
         WorkMode mWorkMode{ WorkMode::CurveEditing };
 
         QThread* mVectorizationManagerThread;
+        
+        // New state for enhancements
+        QVector4D mBackgroundColor{ 0.2f, 0.2f, 0.2f, 1.0f };
+        bool mShowGrid{ false };
+        float mGridSpacing{ 50.0f };
     };
 }

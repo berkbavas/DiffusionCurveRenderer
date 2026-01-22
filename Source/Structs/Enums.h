@@ -48,6 +48,14 @@ namespace DiffusionCurveRenderer
         Spline = 0x01
     };
 
+    // UI Theme options
+    enum class UITheme
+    {
+        Dark = 0,
+        Light = 1,
+        Classic = 2
+    };
+
     Q_DECLARE_FLAGS(RenderModes, RenderMode);
 }
 

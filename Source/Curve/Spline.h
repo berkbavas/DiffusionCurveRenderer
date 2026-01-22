@@ -48,6 +48,9 @@ namespace DiffusionCurveRenderer
 
         QJsonObject ToJsonObject();
         static CurvePtr FromJsonObject(QJsonObject object);
+        
+        // Clone the curve with an optional offset
+        std::shared_ptr<Curve> Clone(const QVector2D& offset = QVector2D(20, 20)) const override;
 
       private:
         Eigen::MatrixXf CreateCoefficientMatrix();

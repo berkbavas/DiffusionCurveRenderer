@@ -436,3 +436,42 @@ DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::Spline::FromJsonObject(
 
     return spline;
 }
+
+std::shared_ptr<DiffusionCurveRenderer::Curve> DiffusionCurveRenderer::Spline::Clone(const QVector2D& offset) const
+{
+    auto clone = std::make_shared<Spline>();
+    
+    // Copy control points with offset
+    for (const auto& controlPoint : mControlPoints)
+    {
+        clone->AddControlPoint(controlPoint->position + offset);
+    }
+    
+    // Need to update to create patches
+    clone->Update();
+    
+    // Copy color points from patches
+    for (int i = 0; i < mBezierPatches.size() && i < clone->mBezierPatches.size(); ++i)
+    {
+        const auto& srcPatch = mBezierPatches[i];
+        auto& dstPatch = clone->mBezierPatches[i];
+        
+        for (const auto& colorPoint : srcPatch->GetColorPoints())
+        {
+            dstPatch->AddColorPoint(colorPoint->type, colorPoint->color, colorPoint->position);
+        }
+        
+        for (const auto& blurPoint : srcPatch->GetBlurPoints())
+        {
+            dstPatch->AddBlurPoint(blurPoint->position, blurPoint->strength);
+        }
+    }
+    
+    // Copy curve properties
+    clone->SetContourColor(GetContourColor());
+    clone->SetContourThickness(GetContourThickness());
+    clone->SetDiffusionWidth(GetDiffusionWidth());
+    clone->SetDiffusionGap(GetDiffusionGap());
+    
+    return clone;
+}

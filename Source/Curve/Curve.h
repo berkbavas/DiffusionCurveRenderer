@@ -73,6 +73,9 @@ namespace DiffusionCurveRenderer
         ColorPointPtr TryCreateColorPointAt(const QVector2D& worldPosition) const;
 
         float CalculateLength(int intervals = 100) const;
+        
+        // Clone the curve with an optional offset
+        virtual std::shared_ptr<Curve> Clone(const QVector2D& offset = QVector2D(20, 20)) const = 0;
 
       private:
         DEFINE_MEMBER(QVector4D, ContourColor, QVector4D(0, 0, 0, 1));

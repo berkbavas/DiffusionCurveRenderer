@@ -6,11 +6,13 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QStringList>
 
 namespace DiffusionCurveRenderer
 {
     class CurveContainer;
     class RendererManager;
+    class OrthographicCamera;
 
     class ImGuiWindow : public QObject
     {
@@ -32,6 +34,8 @@ namespace DiffusionCurveRenderer
 
         void SetVectorizationViewOption(VectorizationViewOption option);
         void SetRenderMode(RenderMode mode, bool on);
+        
+        void AddRecentFile(const QString& path);
 
       signals:
         void SelectedCurveChanged(CurvePtr selectedCurve);
@@ -55,6 +59,14 @@ namespace DiffusionCurveRenderer
         void LoadImage(const QString& path);
         void Vectorize(VectorizationCurveType curveType, int edgeLevel);
         void ShowColorPointHandlesChanged(bool value);
+        
+        // New signals for enhanced features
+        void DuplicateCurve(CurvePtr curve);
+        void BackgroundColorChanged(const QVector4D& color);
+        void ShowGridChanged(bool show);
+        void ZoomToFit();
+        void ResetView();
+        void ThemeChanged(UITheme theme);
 
       private:
         void DrawWorkModes();
@@ -66,7 +78,11 @@ namespace DiffusionCurveRenderer
         void DrawCurveHeader();
         void DrawRenderSettings();
         void DrawStats();
+        void DrawViewSettings();
+        void DrawAboutPopup();
+        void DrawShortcutsPopup();
         void SetGaussianStackLayer(int layer);
+        void ApplyTheme(UITheme theme);
 
         CurvePtr mSelectedCurve{ nullptr };
         ControlPointPtr mSelectedControlPoint{ nullptr };
@@ -95,6 +111,16 @@ namespace DiffusionCurveRenderer
         bool mShowColorPointHandles{ true };
 
         VectorizationCurveType mVectorizationCurveType{ VectorizationCurveType::Bezier };
+        
+        // New UI state
+        UITheme mCurrentTheme{ UITheme::Dark };
+        QVector4D mBackgroundColor{ 0.2f, 0.2f, 0.2f, 1.0f };
+        bool mShowGrid{ false };
+        float mGridSpacing{ 50.0f };
+        bool mShowAboutPopup{ false };
+        bool mShowShortcutsPopup{ false };
+        QStringList mRecentFiles;
+        static constexpr int MAX_RECENT_FILES = 10;
 
         DEFINE_MEMBER(float, VectorizationProgress, 0.0f); // [0,1]
         DEFINE_MEMBER(int, MaximumGaussianStackLayer, 10);
@@ -102,6 +128,7 @@ namespace DiffusionCurveRenderer
 
         DEFINE_MEMBER_PTR(CurveContainer, CurveContainer);
         DEFINE_MEMBER_PTR(RendererManager, RendererManager);
+        DEFINE_MEMBER_PTR(OrthographicCamera, Camera);
         DEFINE_MEMBER(bool, ImageLoaded, false);
 
         static constexpr const char* FRAME_BUFFER_SIZES[3] = { "1024", "2048", "4096" };

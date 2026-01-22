@@ -40,6 +40,11 @@ namespace DiffusionCurveRenderer
         void ColorPointAroundChanged(ColorPointPtr point);
         void SelectedControlPointChanged(ControlPointPtr point);
         void SelectedColorPointChanged(ColorPointPtr point);
+        
+        // New signals for keyboard shortcuts
+        void DuplicateCurveRequested();
+        void ZoomToFitRequested();
+        void ResetViewRequested();
 
       private:
         CurvePtr GetCurveAround(float x, float y);
@@ -55,6 +60,7 @@ namespace DiffusionCurveRenderer
         ColorPointPtr mSelectedColorPoint{ nullptr };
 
         Qt::Key mPressedKey{ Qt::Key_No };
+        Qt::KeyboardModifiers mModifiers{ Qt::NoModifier };
 
         Mouse mMouse;
 

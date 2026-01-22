@@ -26,6 +26,7 @@ namespace DiffusionCurveRenderer
         void PaintControlPointsHandles();
         void PaintColorPointsHandles();
         void PaintColorPointsHandles(BezierPtr bezier);
+        void DrawGrid();
 
         void FillOuterDisk(QPainter& painter, QPointF center, float scaling, QBrush brush = QColor(128, 128, 128, 128));
         void FillInnerDisk(QPainter& painter, QPointF center, float scaling, QBrush brush = QColor(255, 255, 255));
@@ -39,6 +40,7 @@ namespace DiffusionCurveRenderer
         QPen mDenseDashedPen;
         QPen mSolidPen{ QColor(255, 255, 255) };
         QPen mClearPen{ QColor(0, 0, 0, 0) };
+        QPen mGridPen{ QColor(100, 100, 100, 80) };
 
         DEFINE_MEMBER(CurvePtr, SelectedCurve);
         DEFINE_MEMBER_PTR(QPaintDevice, Device);
@@ -49,6 +51,8 @@ namespace DiffusionCurveRenderer
         DEFINE_MEMBER(ColorPointPtr, ColorPointAround);
         DEFINE_MEMBER(BlurPointPtr, SelectedBlurPoint);
         DEFINE_MEMBER(bool, PaintColorPointHandles, true);
+        DEFINE_MEMBER(bool, ShowGrid, false);
+        DEFINE_MEMBER(float, GridSpacing, 50.0f);
 
         static constexpr float INNER_DISK_RADIUS{ HANDLE_INNER_DISK_RADIUS_PX };
         static constexpr float OUTER_DISK_RADIUS{ HANDLE_OUTER_DISK_RADIUS_PX };
