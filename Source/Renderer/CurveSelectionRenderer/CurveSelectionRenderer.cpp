@@ -78,7 +78,10 @@ void DiffusionCurveRenderer::CurveSelectionRenderer::Render()
 
 DiffusionCurveRenderer::CurveQueryInfo DiffusionCurveRenderer::CurveSelectionRenderer::Query(const QPoint& queryPoint)
 {
-    return mFramebuffer->Query(queryPoint);
+    // Scale query point by device pixel ratio for high DPI displays
+    float pixelRatio = mCamera->GetPixelRatio();
+    QPoint scaledPoint(queryPoint.x() * pixelRatio, queryPoint.y() * pixelRatio);
+    return mFramebuffer->Query(scaledPoint);
 }
 
 void DiffusionCurveRenderer::CurveSelectionRenderer::Resize(int width, int height)
