@@ -12,10 +12,7 @@ namespace DiffusionCurveRenderer
     struct Stats
     {
         uint64_t NumberOfCalls{ 0 };
-        uint64_t NumberOfQueries{ 0 };
-        uint64_t NumberOfCallsAtLastQuery{ 0 };
         std::chrono::microseconds TotalCallTime{ 0 };
-        std::chrono::microseconds CallTime{ 0 };
         std::chrono::microseconds LastCallTime{ 0 };
         std::chrono::microseconds LongestCallTime{ 0 };
     };
@@ -26,7 +23,6 @@ namespace DiffusionCurveRenderer
         Chronometer(const std::string& Name);
         ~Chronometer();
 
-        static Stats QueryAverageStats(const std::string& Name);
         static std::string Print(const std::string& Name);
         static std::string PrintAll();
 

@@ -1,7 +1,5 @@
 #include "Chronometer.h"
 
-#include "Logger.h"
-
 #include <format>
 
 DiffusionCurveRenderer::Chronometer::Chronometer(const std::string& Name)
@@ -12,12 +10,12 @@ DiffusionCurveRenderer::Chronometer::~Chronometer()
 {
     std::scoped_lock Lock(sMutex);
 
+    const auto Now = std::chrono::system_clock::now();
+
     // Update
     auto& Stats = sStats[mName];
-    const auto Now = std::chrono::system_clock::now();
     const auto Duration = std::chrono::duration_cast<std::chrono::microseconds>(Now - mStartTime);
 
-    Stats.CallTime = Duration;
     Stats.LastCallTime = Duration;
     Stats.TotalCallTime += Duration;
     Stats.NumberOfCalls += 1;
@@ -28,32 +26,15 @@ DiffusionCurveRenderer::Chronometer::~Chronometer()
     }
 }
 
-DiffusionCurveRenderer::Stats DiffusionCurveRenderer::Chronometer::QueryAverageStats(const std::string& Name)
-{
-    std::scoped_lock Lock(sMutex);
-    Stats& Stats = sStats[Name];
-
-    Stats.NumberOfQueries++;
-
-    if (Stats.NumberOfCallsAtLastQuery == Stats.NumberOfCalls)
-    {
-        Stats.CallTime = std::chrono::microseconds(0);
-    }
-
-    Stats.NumberOfCallsAtLastQuery = Stats.NumberOfCalls;
-
-    return Stats;
-}
-
 std::string DiffusionCurveRenderer::Chronometer::Print(const std::string& Name)
 {
-    const auto& Stats = QueryAverageStats(Name);
+    const auto& Stats = sStats[Name];
 
-    return std::format("{:<40}: {:<5.3} ms,   {:<5.3} ms,   {:<5.3} ms", //
+    return std::format("{:<45}: {:<5.3} ms,      {:<5.3} ms,      {:<5.3} sec", //
                        Name,
-                       Stats.CallTime.count() / 1000.0f,
-                       Stats.LastCallTime.count() / 1000.0f,
-                       Stats.LongestCallTime.count() / 1000.0f);
+                       Stats.LastCallTime.count() / 1'000.0f,
+                       Stats.LongestCallTime.count() / 1'000.0f,
+                       Stats.TotalCallTime.count() / 1'000'000.0f);
 }
 
 std::string DiffusionCurveRenderer::Chronometer::PrintAll()
