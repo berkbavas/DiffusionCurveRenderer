@@ -49,7 +49,7 @@ namespace DiffusionCurveRenderer
     };
 
     // UI Theme options
-    enum class UITheme
+    enum class ImGuiTheme
     {
         Dark = 0,
         Light = 1,

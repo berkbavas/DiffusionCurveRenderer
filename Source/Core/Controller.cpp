@@ -173,6 +173,8 @@ void DiffusionCurveRenderer::Controller::Initialize()
     mBitmapRenderer = mRendererManager->GetBitmapRenderer();
 
     QtImGui::initialize(mWindow);
+
+    mImGuiWindow->Initialize();
 }
 
 void DiffusionCurveRenderer::Controller::Render(float Ifps)

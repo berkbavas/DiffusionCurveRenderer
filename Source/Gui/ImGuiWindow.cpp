@@ -14,7 +14,14 @@
 
 DiffusionCurveRenderer::ImGuiWindow::ImGuiWindow(QObject* pParent)
     : QObject(pParent)
-{}
+{
+
+}
+
+void DiffusionCurveRenderer::ImGuiWindow::Initialize() {
+
+    ApplyTheme(ImGuiTheme::Dark);
+}
 
 void DiffusionCurveRenderer::ImGuiWindow::Draw()
 {
@@ -307,17 +314,17 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawMenuBar()
 
         if (ImGui::BeginMenu("Theme"))
         {
-            if (ImGui::MenuItem("Dark", nullptr, mCurrentTheme == UITheme::Dark))
+            if (ImGui::MenuItem("Dark", nullptr, mCurrentTheme == ImGuiTheme::Dark))
             {
-                ApplyTheme(UITheme::Dark);
+                ApplyTheme(ImGuiTheme::Dark);
             }
-            if (ImGui::MenuItem("Light", nullptr, mCurrentTheme == UITheme::Light))
+            if (ImGui::MenuItem("Light", nullptr, mCurrentTheme == ImGuiTheme::Light))
             {
-                ApplyTheme(UITheme::Light);
+                ApplyTheme(ImGuiTheme::Light);
             }
-            if (ImGui::MenuItem("Classic", nullptr, mCurrentTheme == UITheme::Classic))
+            if (ImGui::MenuItem("Classic", nullptr, mCurrentTheme == ImGuiTheme::Classic))
             {
-                ApplyTheme(UITheme::Classic);
+                ApplyTheme(ImGuiTheme::Classic);
             }
 
             ImGui::Separator();
@@ -726,7 +733,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawShortcutsPopup()
     }
 }
 
-void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(UITheme Theme)
+void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(ImGuiTheme Theme)
 {
     mCurrentTheme = Theme;
 
@@ -734,7 +741,7 @@ void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(UITheme Theme)
 
     switch (Theme)
     {
-    case UITheme::Dark:
+    case ImGuiTheme::Dark:
         ImGui::StyleColorsDark();
         Style.FrameRounding = 4.0f;
         Style.WindowRounding = 6.0f;
@@ -756,7 +763,7 @@ void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(UITheme Theme)
         Style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.4f, 0.6f, 0.8f, 1.0f);
         break;
 
-    case UITheme::Light:
+    case ImGuiTheme::Light:
         ImGui::StyleColorsLight();
         Style.FrameRounding = 4.0f;
         Style.WindowRounding = 6.0f;
@@ -772,7 +779,7 @@ void DiffusionCurveRenderer::ImGuiWindow::ApplyTheme(UITheme Theme)
         Style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.6f, 0.75f, 0.9f, 1.0f);
         break;
 
-    case UITheme::Classic:
+    case ImGuiTheme::Classic:
         ImGui::StyleColorsClassic();
         Style.FrameRounding = 2.0f;
         Style.WindowRounding = 4.0f;

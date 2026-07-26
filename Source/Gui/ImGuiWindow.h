@@ -20,6 +20,7 @@ namespace DiffusionCurveRenderer
       public:
         explicit ImGuiWindow(QObject* pParent);
 
+        void Initialize();
         void Draw();
 
         void SetSelectedCurve(CurvePtr pSelectedCurve);
@@ -66,7 +67,7 @@ namespace DiffusionCurveRenderer
         void ShowGridChanged(bool Show);
         void ZoomToFit();
         void ResetView();
-        void ThemeChanged(UITheme Theme);
+        void ThemeChanged(ImGuiTheme Theme);
 
       private:
         void DrawWorkModes();
@@ -82,7 +83,7 @@ namespace DiffusionCurveRenderer
         void DrawAboutPopup();
         void DrawShortcutsPopup();
         void SetGaussianStackLayer(int Layer);
-        void ApplyTheme(UITheme Theme);
+        void ApplyTheme(ImGuiTheme Theme);
 
         CurvePtr mSelectedCurve{ nullptr };
         ControlPointPtr mSelectedControlPoint{ nullptr };
@@ -113,7 +114,7 @@ namespace DiffusionCurveRenderer
         VectorizationCurveType mVectorizationCurveType{ VectorizationCurveType::Bezier };
 
         // New UI state
-        UITheme mCurrentTheme{ UITheme::Dark };
+        ImGuiTheme mCurrentTheme{ ImGuiTheme::Dark };
         QVector4D mBackgroundColor{ 0.2f, 0.2f, 0.2f, 1.0f };
         bool mShowGrid{ false };
         float mGridSpacing{ 50.0f };
