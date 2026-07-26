@@ -32,7 +32,7 @@ DiffusionCurveRenderer::UpsampleRenderer::UpsampleRenderer()
 
 void DiffusionCurveRenderer::UpsampleRenderer::Upsample(const QVector<QOpenGLFramebufferObject*>& Downsamples)
 {
-    MEASURE_CALL_TIME(UPSAMPLE_RENDERER);
+    Chronometer Chronometer("UpsampleRenderer::Upsample");
 
     BlitSourceFramebuffer(Downsamples.last());
 

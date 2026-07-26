@@ -25,7 +25,7 @@ DiffusionCurveRenderer::DownsampleRenderer::DownsampleRenderer()
 
 void DiffusionCurveRenderer::DownsampleRenderer::Downsample(QOpenGLFramebufferObject* pSource)
 {
-    MEASURE_CALL_TIME(DOWNSAMPLE_RENDERER);
+   Chronometer Chronometer("DownsampleRenderer::Downsample");
 
     BlitSourceFramebuffer(pSource);
 

@@ -183,7 +183,7 @@ void DiffusionCurveRenderer::Controller::Render(float Ifps)
 
     { // RendererManager
 
-        MEASURE_CALL_TIME(RENDERER_MANAGER);
+        Chronometer Chronometer("RendererManager");
 
         if (mWorkMode == WorkMode::CurveEditing)
         {

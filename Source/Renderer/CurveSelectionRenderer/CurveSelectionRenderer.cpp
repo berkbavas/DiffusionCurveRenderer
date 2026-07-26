@@ -20,7 +20,7 @@ DiffusionCurveRenderer::CurveSelectionRenderer::CurveSelectionRenderer()
 
 void DiffusionCurveRenderer::CurveSelectionRenderer::Render()
 {
-    MEASURE_CALL_TIME(CURVE_SELECTION_RENDERER);
+    Chronometer Chronometer("CurveSelectionRenderer::Render");
 
     const auto& Curves = mCurveContainer->GetCurves();
 

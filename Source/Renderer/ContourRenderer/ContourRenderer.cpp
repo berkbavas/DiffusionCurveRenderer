@@ -18,7 +18,7 @@ void DiffusionCurveRenderer::ContourRenderer::Initialize()
 
 void DiffusionCurveRenderer::ContourRenderer::Render(QOpenGLFramebufferObject* pTarget)
 {
-    MEASURE_CALL_TIME(CONTOUR_RENDERER);
+    Chronometer Chronometer("ContourRenderer::Render");
 
     if (pTarget == nullptr)
     {

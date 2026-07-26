@@ -521,10 +521,7 @@ void DiffusionCurveRenderer::ImGuiWindow::DrawStats()
 
         ImGui::Separator();
         ImGui::Text("Performance Timings:");
-        for (const auto& ID : ALL_CHORONOMETER_IDs)
-        {
-            ImGui::Text("  %s", Chronometer::Print(ID).c_str());
-        }
+        ImGui::Text("%s", Chronometer::PrintAll().c_str());
     }
 }
 

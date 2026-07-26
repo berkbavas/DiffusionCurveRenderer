@@ -10,9 +10,9 @@ QVector2D DiffusionCurveRenderer::Bezier::PositionAt(float Parameter) const
     const int N = GetDegree();
     QVector2D Value = QVector2D(0, 0);
 
-    for (int i = 0; i <= N; i++)
+    for (int I = 0; I <= N; I++)
     {
-        Value += Choose(N, i) * pow(Parameter, i) * pow(1 - Parameter, N - i) * GetControlPointPosition(i);
+        Value += Choose(N, I) * pow(Parameter, I) * pow(1 - Parameter, N - I) * GetControlPointPosition(I);
     }
 
     return Value;
@@ -24,10 +24,10 @@ QVector2D DiffusionCurveRenderer::Bezier::TangentAt(float Parameter) const
 
     QVector2D Tangent = QVector2D(0, 0);
 
-    for (int i = 0; i <= Order - 1; i++)
+    for (int I = 0; I <= Order - 1; I++)
     {
-        const auto Coefficient = Choose(Order - 1, i) * pow(Parameter, i) * pow(1 - Parameter, Order - 1 - i);
-        Tangent += Coefficient * (GetControlPointPosition(i) - GetControlPointPosition(i + 1));
+        const auto Coefficient = Choose(Order - 1, I) * pow(Parameter, I) * pow(1 - Parameter, Order - 1 - I);
+        Tangent += Coefficient * (GetControlPointPosition(I) - GetControlPointPosition(I + 1));
     }
 
     Tangent.normalize();
@@ -412,7 +412,7 @@ bool DiffusionCurveRenderer::Bezier::RemoveBlurPoint(BlurPointPtr pPoint)
 
 DiffusionCurveRenderer::ColorPointPtr DiffusionCurveRenderer::Bezier::FindColorPointAround(const QVector2D& Test, float Offset, float Tolerance)
 {
-    MEASURE_CALL_TIME(BEZIER_FIND_COLOR_POINT_AROUND);
+    Chronometer Chronometer("Bezier::FindColorPointAround");
 
     ColorPointPtr pResult = nullptr;
 

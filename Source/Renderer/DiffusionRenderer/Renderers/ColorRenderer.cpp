@@ -22,7 +22,7 @@ DiffusionCurveRenderer::ColorRenderer::ColorRenderer()
 
 void DiffusionCurveRenderer::ColorRenderer::Render(QOpenGLFramebufferObject* pTarget)
 {
-    MEASURE_CALL_TIME(COLOR_RENDERER);
+    Chronometer Chronometer("ColorRenderer::Render");
 
     if (mUseMultisampleFramebuffer)
     {

@@ -31,7 +31,7 @@ DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::CurveContainer::GetCurv
 
 DiffusionCurveRenderer::CurvePtr DiffusionCurveRenderer::CurveContainer::GetCurveAround(const QVector2D& Test, float Radius)
 {
-    MEASURE_CALL_TIME(CURVE_CONTAINER_GET_CURVE_AROUND);
+    Chronometer Chronometer("CurveContainer::GetCurveAround");
 
     float MinDistance = std::numeric_limits<float>::infinity();
 

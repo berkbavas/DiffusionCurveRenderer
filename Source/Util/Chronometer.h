@@ -28,16 +28,13 @@ namespace DiffusionCurveRenderer
 
         static Stats QueryAverageStats(const std::string& Name);
         static std::string Print(const std::string& Name);
+        static std::string PrintAll();
 
       private:
         Clock mStartTime{ std::chrono::system_clock::now() };
         std::string mName;
 
-        static std::mutex MUTEX;
-        static std::map<std::string, Stats> STATS_OF_INSTANCES;
+        static std::mutex sMutex;
+        static std::map<std::string, Stats> sStats;
     };
 }
-
-#define MEASURE_CALL_TIME(NAME) DiffusionCurveRenderer::Chronometer CHRONOMETER__##NAME = DiffusionCurveRenderer::Chronometer(NAME)
-
-#define MEASURE_CALL_TIME_WITH_ARGS(NAME, FORMAT, ...) DiffusionCurveRenderer::Chronometer CHRONOMETER__##NAME = DiffusionCurveRenderer::Chronometer(std::format(FORMAT, __VA_ARGS__))
