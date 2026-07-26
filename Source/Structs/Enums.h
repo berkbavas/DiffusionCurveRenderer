@@ -1,0 +1,62 @@
+#pragma once
+
+#include <QObject>
+
+namespace DiffusionCurveRenderer
+{
+    enum class WorkMode
+    {
+        Vectorization = 0x00,
+        CurveEditing = 0x01,
+    };
+
+    enum class VectorizationStage
+    {
+        Initial,
+        GaussianStack,
+        EdgeStack,
+        EdgeTracer,
+        Potrace,
+        CurveConstructor,
+        ColorSampler,
+        Finished
+    };
+
+    enum class VectorizationViewOption
+    {
+        ViewOriginalImage,
+        ViewEdges,
+        ViewGaussianStack,
+        ChooseEdgeStackLevel
+    };
+
+    enum class RenderMode : uint32_t
+    {
+        Contour = 0x01,
+        Diffusion = 0x02
+    };
+
+    enum class ColorPointType
+    {
+        Left,
+        Right
+    };
+
+    enum class VectorizationCurveType
+    {
+        Bezier = 0x00,
+        Spline = 0x01
+    };
+
+    // UI Theme options
+    enum class UITheme
+    {
+        Dark = 0,
+        Light = 1,
+        Classic = 2
+    };
+
+    Q_DECLARE_FLAGS(RenderModes, RenderMode);
+}
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(DiffusionCurveRenderer::RenderModes);
