@@ -20,7 +20,7 @@ DiffusionCurveRenderer::ImGuiWindow::ImGuiWindow(QObject* pParent)
 
 void DiffusionCurveRenderer::ImGuiWindow::Initialize() {
 
-    ApplyTheme(ImGuiTheme::Dark);
+    ApplyTheme(ImGuiTheme::Light);
 }
 
 void DiffusionCurveRenderer::ImGuiWindow::Draw()
