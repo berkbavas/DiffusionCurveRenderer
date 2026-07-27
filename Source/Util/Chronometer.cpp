@@ -8,13 +8,10 @@ DiffusionCurveRenderer::Chronometer::Chronometer(const std::string& Name)
 
 DiffusionCurveRenderer::Chronometer::~Chronometer()
 {
-    std::scoped_lock Lock(sMutex);
-
-    const auto Now = std::chrono::system_clock::now();
-
-    // Update
-    auto& Stats = sStats[mName];
+    const auto Now = std::chrono::high_resolution_clock::now();
     const auto Duration = std::chrono::duration_cast<std::chrono::microseconds>(Now - mStartTime);
+
+    auto& Stats = sStats[mName];
 
     Stats.LastCallTime = Duration;
     Stats.TotalCallTime += Duration;
@@ -48,7 +45,5 @@ std::string DiffusionCurveRenderer::Chronometer::PrintAll()
 
     return Result;
 }
-
-std::mutex DiffusionCurveRenderer::Chronometer::sMutex{};
 
 std::map<std::string, DiffusionCurveRenderer::Stats> DiffusionCurveRenderer::Chronometer::sStats{};

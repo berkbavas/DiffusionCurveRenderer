@@ -7,7 +7,7 @@
 
 namespace DiffusionCurveRenderer
 {
-    using Clock = std::chrono::time_point<std::chrono::system_clock>;
+    using Clock = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
     struct Stats
     {
@@ -21,16 +21,17 @@ namespace DiffusionCurveRenderer
     {
       public:
         Chronometer(const std::string& Name);
+        Chronometer(const Chronometer&) = delete;
+        Chronometer& operator=(const Chronometer&) = delete;
         ~Chronometer();
 
         static std::string Print(const std::string& Name);
         static std::string PrintAll();
 
       private:
-        Clock mStartTime{ std::chrono::system_clock::now() };
+        Clock mStartTime{ std::chrono::high_resolution_clock::now() };
         std::string mName;
 
-        static std::mutex sMutex;
         static std::map<std::string, Stats> sStats;
     };
 }
